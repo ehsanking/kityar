@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Palette, RotateCw, Sparkles, Sun, Compass, Sliders, Check } from 'lucide-react';
-import { HexColorPicker } from 'react-colorful';
+import { RgbaStringColorPicker } from 'react-colorful';
+import { toRgba } from '../utils/color';
 import { CustomGradientConfig } from '../types/canvasLayers';
 import { toPersianDigits } from '../utils/persianNumbers';
 
@@ -282,14 +283,14 @@ export const CustomGradientStudio: React.FC<CustomGradientStudioProps> = ({
                 بستن ✕
               </button>
             </div>
-            <HexColorPicker
-              color={
+            <RgbaStringColorPicker
+              color={toRgba(
                 activePicker === 'stop1'
                   ? config.stop1
                   : activePicker === 'stop2'
                   ? config.stop2
                   : config.stop3 || config.stop2
-              }
+              )}
               onChange={(color) => {
                 if (activePicker === 'stop1') onChange({ ...config, stop1: color });
                 else if (activePicker === 'stop2') onChange({ ...config, stop2: color });

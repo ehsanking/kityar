@@ -13,7 +13,8 @@ import {
   Sparkles,
   Download,
 } from 'lucide-react';
-import { HexColorPicker } from 'react-colorful';
+import { RgbaStringColorPicker } from 'react-colorful';
+import { toRgba } from '../utils/color';
 
 export interface KonvaShape {
   id: string;
@@ -199,9 +200,9 @@ export const KonvaCanvasStudio: React.FC<KonvaCanvasStudioProps> = ({ onSendShap
       </div>
 
       {/* Main Studio Area */}
-      <div className="grid grid-cols-1 @2xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 @2xl:grid-cols-4 gap-4 min-w-0 [&>*]:min-w-0">
         {/* Stage Container */}
-        <div ref={stageBoxRef} className="@2xl:col-span-3 bg-slate-900/80 rounded-xl border border-white/10 p-2 flex items-center justify-center relative overflow-hidden">
+        <div ref={stageBoxRef} className="min-w-0 w-full @2xl:col-span-3 bg-slate-900/80 rounded-xl border border-white/10 p-2 flex items-center justify-center relative overflow-hidden">
           <Stage
             width={STAGE_W * stageScale}
             height={STAGE_H * stageScale}
@@ -401,8 +402,8 @@ export const KonvaCanvasStudio: React.FC<KonvaCanvasStudioProps> = ({ onSendShap
 
                 {showPicker && (
                   <div className="p-2 bg-slate-950 rounded-xl border border-indigo-500/40 shadow-xl space-y-2">
-                    <HexColorPicker
-                      color={selectedShape.fill}
+                    <RgbaStringColorPicker
+                      color={toRgba(selectedShape.fill)}
                       onChange={handleColorChange}
                       style={{ width: '100%', height: '120px' }}
                     />

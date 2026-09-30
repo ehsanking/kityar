@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import ColorField from './ColorField';
 import { Upload, Trash2, Move, Layers, CheckCircle2, Image as ImageIcon, Sliders } from 'lucide-react';
 import ZhaketLogo, { LogoBackdropType, LogoPlacement, ZhaketLogoConfig } from './ZhaketLogo';
 import { toPersianDigits } from '../utils/persianNumbers';
@@ -383,12 +384,7 @@ export const LogoControls: React.FC<LogoControlsProps> = ({ config, onChange, on
               <div className="space-y-1">
                 <label className="text-[10px] text-slate-400 block">رنگ خط حاشیه باکس:</label>
                 <div className="flex items-center gap-1.5">
-                  <input
-                    type="color"
-                    value={config.boxBorderColor?.startsWith('#') ? config.boxBorderColor : '#f59e0b'}
-                    onChange={(e) => onChange({ ...config, boxBorderColor: e.target.value })}
-                    className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                  />
+                  <ColorField label="انتخاب رنگ" value={config.boxBorderColor?.startsWith('#') ? config.boxBorderColor : '#f59e0b'} onChange={(v) => onChange({ ...config, boxBorderColor: v })} />
                   <input
                     type="text"
                     value={config.boxBorderColor || '#f59e0b'}
@@ -401,12 +397,7 @@ export const LogoControls: React.FC<LogoControlsProps> = ({ config, onChange, on
               <div className="space-y-1">
                 <label className="text-[10px] text-slate-400 block">رنگ پس‌زمینه باکس:</label>
                 <div className="flex items-center gap-1.5">
-                  <input
-                    type="color"
-                    value={config.boxBgColor?.startsWith('#') ? config.boxBgColor : '#0f172a'}
-                    onChange={(e) => onChange({ ...config, boxBgColor: e.target.value })}
-                    className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                  />
+                  <ColorField label="انتخاب رنگ" value={config.boxBgColor?.startsWith('#') ? config.boxBgColor : '#0f172a'} onChange={(v) => onChange({ ...config, boxBgColor: v })} />
                   <input
                     type="text"
                     placeholder="شفاف (پیش‌فرض)"

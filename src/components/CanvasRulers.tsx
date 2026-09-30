@@ -1,4 +1,5 @@
 import React from 'react';
+import { withAlpha } from '../utils/color';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPersianDigits } from '../utils/persianNumbers';
 
@@ -498,8 +499,8 @@ export const CanvasRulers: React.FC<CanvasRulersProps> = ({
                               className="absolute top-2 -translate-x-1/2 bg-slate-950/95 font-sans text-[9px] font-bold px-2.5 py-0.8 rounded-full border shadow-xl whitespace-nowrap flex items-center gap-1.5 z-50 backdrop-blur-md"
                               style={{
                                 color: color,
-                                borderColor: `${color}aa`,
-                                boxShadow: `0 0 12px ${color}55`,
+                                borderColor: withAlpha(color, 0.667),
+                                boxShadow: `0 0 12px ${withAlpha(color, 0.333)}`,
                               }}
                             >
                               <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: color }} />
@@ -548,8 +549,8 @@ export const CanvasRulers: React.FC<CanvasRulersProps> = ({
                               className="absolute right-2 -translate-y-1/2 bg-slate-950/95 font-sans text-[9px] font-bold px-2.5 py-0.8 rounded-full border shadow-xl whitespace-nowrap flex items-center gap-1.5 z-50 backdrop-blur-md"
                               style={{
                                 color: color,
-                                borderColor: `${color}aa`,
-                                boxShadow: `0 0 12px ${color}55`,
+                                borderColor: withAlpha(color, 0.667),
+                                boxShadow: `0 0 12px ${withAlpha(color, 0.333)}`,
                               }}
                             >
                               <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: color }} />
@@ -589,7 +590,7 @@ export const CanvasRulers: React.FC<CanvasRulersProps> = ({
                         style={{ 
                           borderWidth: `${safeThickness}px`,
                           borderColor: crosshairColor,
-                          backgroundColor: `${crosshairColor}22`,
+                          backgroundColor: withAlpha(crosshairColor, 0.133),
                           boxShadow: `0 0 16px ${crosshairColor}`,
                         }}
                       >
@@ -639,7 +640,7 @@ export const CanvasRulers: React.FC<CanvasRulersProps> = ({
                         transition={{ type: 'spring', stiffness: 600, damping: 35 }}
                         style={{ 
                           borderLeftWidth: `${safeThickness}px`,
-                          borderLeftColor: `${crosshairColor}66`,
+                          borderLeftColor: withAlpha(crosshairColor, 0.4),
                         }}
                       />
                       <motion.div
@@ -648,7 +649,7 @@ export const CanvasRulers: React.FC<CanvasRulersProps> = ({
                         transition={{ type: 'spring', stiffness: 600, damping: 35 }}
                         style={{ 
                           borderTopWidth: `${safeThickness}px`,
-                          borderTopColor: `${crosshairColor}66`,
+                          borderTopColor: withAlpha(crosshairColor, 0.4),
                         }}
                       />
                     </motion.div>

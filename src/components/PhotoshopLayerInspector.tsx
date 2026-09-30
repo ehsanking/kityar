@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ColorField from './ColorField';
+import { formatRgba, isColor, parseColor, toHex6 } from '../utils/color';
 import {
   Sliders,
   Type,
@@ -55,44 +57,9 @@ import { PERSIAN_FONTS } from './FontSelector';
 import { toPersianDigits } from '../utils/persianNumbers';
 
 // Color conversion helpers for shadow color picker
-const getHexAndAlpha = (colorStr: string) => {
-  let hex = '#000000';
-  let alpha = 1;
-  
-  if (!colorStr) return { hex, alpha };
-  
-  if (colorStr.startsWith('#')) {
-    hex = colorStr;
-    alpha = 1;
-  } else if (colorStr.startsWith('rgba')) {
-    const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-    if (match) {
-      const r = parseInt(match[1]);
-      const g = parseInt(match[2]);
-      const b = parseInt(match[3]);
-      alpha = match[4] !== undefined ? parseFloat(match[4]) : 1;
-      hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-    }
-  } else if (colorStr.startsWith('rgb')) {
-    const match = colorStr.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-    if (match) {
-      const r = parseInt(match[1]);
-      const g = parseInt(match[2]);
-      const b = parseInt(match[3]);
-      hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-      alpha = 1;
-    }
-  }
-  return { hex, alpha };
-};
-
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : { r: 0, g: 0, b: 0 };
+const getHexAndAlpha = (colorStr: string | undefined) => {
+  const c = parseColor(colorStr);
+  return { hex: toHex6(colorStr ?? '#000000'), alpha: c ? c.a : 1 };
 };
 
 // Temporary style clipboard cache for Copy / Paste Style
@@ -584,12 +551,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                   <span className="font-mono text-amber-300 text-[10px] uppercase">{data.textColor || '#ffffff'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={data.textColor || '#ffffff'}
-                    onChange={(e) => handleDataChange('textColor', e.target.value)}
-                    className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-slate-700"
-                  />
+                  <ColorField label="انتخاب رنگ" value={data.textColor || '#ffffff'} onChange={(v) => handleDataChange('textColor', v)} />
                   <div className="flex gap-1 flex-wrap">
                     {['#ffffff', '#fbbf24', '#10b981', '#06b6d4', '#ec4899', '#6366f1', '#f43f5e', '#0f172a'].map((c) => (
                       <button
@@ -667,12 +629,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 block">رنگ پس‌زمینه کپسول‌ها:</label>
                   <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={data.pillBgColor?.startsWith('#') ? data.pillBgColor : '#0f172a'}
-                      onChange={(e) => handleDataChange('pillBgColor', e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                    />
+                    <ColorField label="انتخاب رنگ" value={data.pillBgColor?.startsWith('#') ? data.pillBgColor : '#0f172a'} onChange={(v) => handleDataChange('pillBgColor', v)} />
                     <input
                       type="text"
                       placeholder="پیش‌فرض دارک"
@@ -686,12 +643,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 block">رنگ متن ویژگی‌ها:</label>
                   <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={data.pillTextColor || '#ffffff'}
-                      onChange={(e) => handleDataChange('pillTextColor', e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                    />
+                    <ColorField label="انتخاب رنگ" value={data.pillTextColor || '#ffffff'} onChange={(v) => handleDataChange('pillTextColor', v)} />
                     <input
                       type="text"
                       value={data.pillTextColor || '#ffffff'}
@@ -730,12 +682,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                   <span className="font-mono text-amber-300 text-[10px] uppercase">{data.fillColor || '#4f46e5'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={data.fillColor?.startsWith('#') ? data.fillColor : '#4f46e5'}
-                    onChange={(e) => handleDataChange('fillColor', e.target.value)}
-                    className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-slate-700"
-                  />
+                  <ColorField label="انتخاب رنگ" value={data.fillColor?.startsWith('#') ? data.fillColor : '#4f46e5'} onChange={(v) => handleDataChange('fillColor', v)} />
                   <input
                     type="text"
                     value={data.fillColor || '#4f46e5'}
@@ -763,12 +710,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                   <span className="font-mono text-cyan-300 text-[10px] uppercase">{data.strokeColor || '#818cf8'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={data.strokeColor?.startsWith('#') ? data.strokeColor : '#818cf8'}
-                    onChange={(e) => handleDataChange('strokeColor', e.target.value)}
-                    className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-slate-700"
-                  />
+                  <ColorField label="انتخاب رنگ" value={data.strokeColor?.startsWith('#') ? data.strokeColor : '#818cf8'} onChange={(v) => handleDataChange('strokeColor', v)} />
                   <input
                     type="text"
                     value={data.strokeColor || '#818cf8'}
@@ -913,12 +855,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 block">رنگ پس‌زمینه کادر:</label>
                   <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={data.boxBgColor?.startsWith('#') ? data.boxBgColor : '#0f172a'}
-                      onChange={(e) => handleDataChange('boxBgColor', e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                    />
+                    <ColorField label="انتخاب رنگ" value={data.boxBgColor?.startsWith('#') ? data.boxBgColor : '#0f172a'} onChange={(v) => handleDataChange('boxBgColor', v)} />
                     <input
                       type="text"
                       placeholder="rgba(15,23,42,0.8)"
@@ -932,12 +869,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 block">رنگ خط حاشیه کادر:</label>
                   <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={data.boxBorderColor?.startsWith('#') ? data.boxBorderColor : '#fbbf24'}
-                      onChange={(e) => handleDataChange('boxBorderColor', e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                    />
+                    <ColorField label="انتخاب رنگ" value={data.boxBorderColor?.startsWith('#') ? data.boxBorderColor : '#fbbf24'} onChange={(v) => handleDataChange('boxBorderColor', v)} />
                     <input
                       type="text"
                       value={data.boxBorderColor || ''}
@@ -1016,12 +948,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 block">رنگ اختصاصی متن:</label>
                   <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={data.textColor || '#ffffff'}
-                      onChange={(e) => handleDataChange('textColor', e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                    />
+                    <ColorField label="انتخاب رنگ" value={data.textColor || '#ffffff'} onChange={(v) => handleDataChange('textColor', v)} />
                     <input
                       type="text"
                       value={data.textColor || '#ffffff'}
@@ -1034,12 +961,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 block">رنگ خط حاشیه:</label>
                   <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={data.borderColor?.startsWith('#') ? data.borderColor : '#fbbf24'}
-                      onChange={(e) => handleDataChange('borderColor', e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                    />
+                    <ColorField label="انتخاب رنگ" value={data.borderColor?.startsWith('#') ? data.borderColor : '#fbbf24'} onChange={(v) => handleDataChange('borderColor', v)} />
                     <input
                       type="text"
                       value={data.borderColor || '#fbbf24'}
@@ -1067,12 +989,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                   <span className="font-mono text-amber-300 text-[10px] uppercase">{data.iconColor || '#fbbf24'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={data.iconColor?.startsWith('#') ? data.iconColor : '#fbbf24'}
-                    onChange={(e) => handleDataChange('iconColor', e.target.value)}
-                    className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-slate-700"
-                  />
+                  <ColorField label="انتخاب رنگ" value={data.iconColor?.startsWith('#') ? data.iconColor : '#fbbf24'} onChange={(v) => handleDataChange('iconColor', v)} />
                   <input
                     type="text"
                     value={data.iconColor || '#fbbf24'}
@@ -1123,12 +1040,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
               <div className="space-y-1">
                 <label className="text-[10px] text-slate-400 block">رنگ پس‌زمینه کادر آیکون:</label>
                 <div className="flex items-center gap-1.5">
-                  <input
-                    type="color"
-                    value={data.iconBgColor?.startsWith('#') ? data.iconBgColor : '#0f172a'}
-                    onChange={(e) => handleDataChange('iconBgColor', e.target.value)}
-                    className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                  />
+                  <ColorField label="انتخاب رنگ" value={data.iconBgColor?.startsWith('#') ? data.iconBgColor : '#0f172a'} onChange={(v) => handleDataChange('iconBgColor', v)} />
                   <input
                     type="text"
                     placeholder="پیش‌فرض دارک گلس"
@@ -1280,15 +1192,10 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                     <div className="space-y-1">
                       <label className="text-[10px] text-slate-400 block">رنگ پس‌زمینه کادر:</label>
                       <div className="flex items-center gap-1.5">
-                        <input
-                          type="color"
-                          value={(data.model3dBgColor || data.fillColor)?.startsWith('#') ? (data.model3dBgColor || data.fillColor) : '#1e1b4b'}
-                          onChange={(e) => {
-                            handleDataChange('model3dBgColor', e.target.value);
-                            handleDataChange('fillColor', e.target.value);
-                          }}
-                          className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                        />
+                        <ColorField label="انتخاب رنگ" value={(data.model3dBgColor || data.fillColor)?.startsWith('#') ? (data.model3dBgColor || data.fillColor) : '#1e1b4b'} onChange={(v) => {
+                            handleDataChange('model3dBgColor', v);
+                            handleDataChange('fillColor', v);
+                          }} />
                         <input
                           type="text"
                           placeholder="پیش‌فرض سورمه‌ای"
@@ -1305,15 +1212,10 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                     <div className="space-y-1">
                       <label className="text-[10px] text-slate-400 block">رنگ خط حاشیه کادر:</label>
                       <div className="flex items-center gap-1.5">
-                        <input
-                          type="color"
-                          value={(data.model3dBorderColor || data.strokeColor)?.startsWith('#') ? (data.model3dBorderColor || data.strokeColor) : '#818cf8'}
-                          onChange={(e) => {
-                            handleDataChange('model3dBorderColor', e.target.value);
-                            handleDataChange('strokeColor', e.target.value);
-                          }}
-                          className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border border-slate-700 p-0"
-                        />
+                        <ColorField label="انتخاب رنگ" value={(data.model3dBorderColor || data.strokeColor)?.startsWith('#') ? (data.model3dBorderColor || data.strokeColor) : '#818cf8'} onChange={(v) => {
+                            handleDataChange('model3dBorderColor', v);
+                            handleDataChange('strokeColor', v);
+                          }} />
                         <input
                           type="text"
                           value={data.model3dBorderColor || data.strokeColor || ''}
@@ -1493,20 +1395,7 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                   <div className="flex items-center gap-2">
                     {/* Native color picker button */}
                     <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 flex items-center justify-center shrink-0">
-                      <input
-                        type="color"
-                        value={(() => {
-                          const { hex } = getHexAndAlpha(layer.shadow!.color);
-                          return hex;
-                        })()}
-                        onChange={(e) => {
-                          const hex = e.target.value;
-                          const { alpha } = getHexAndAlpha(layer.shadow!.color);
-                          const rgb = hexToRgb(hex);
-                          onUpdateLayer({ shadow: { ...layer.shadow!, color: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})` } });
-                        }}
-                        className="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer opacity-100 scale-125"
-                      />
+<ColorField label="رنگ سایه" value={layer.shadow!.color} onChange={(v) => onUpdateLayer({ shadow: { ...layer.shadow!, color: v } })} />
                     </div>
 
                     {/* Direct HEX/RGBA text box editor */}
@@ -1536,9 +1425,8 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                       value={Math.round(getHexAndAlpha(layer.shadow!.color).alpha * 100)}
                       onChange={(e) => {
                         const alphaVal = Number(e.target.value) / 100;
-                        const { hex } = getHexAndAlpha(layer.shadow!.color);
-                        const rgb = hexToRgb(hex);
-                        onUpdateLayer({ shadow: { ...layer.shadow!, color: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alphaVal})` } });
+                        const c = parseColor(layer.shadow!.color) ?? { r: 0, g: 0, b: 0, a: 1 };
+                        onUpdateLayer({ shadow: { ...layer.shadow!, color: formatRgba({ ...c, a: alphaVal }) } });
                       }}
                       className="w-full accent-amber-500 h-1 bg-slate-800 rounded"
                     />
@@ -1787,14 +1675,8 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-slate-400">رنگ تابش داخلی:</span>
                   <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={layer.innerGlow.color}
-                      onChange={(e) =>
-                        onUpdateLayer({ innerGlow: { ...layer.innerGlow!, color: e.target.value } })
-                      }
-                      className="w-6 h-6 rounded cursor-pointer bg-transparent"
-                    />
+                    <ColorField label="انتخاب رنگ" value={layer.innerGlow.color} onChange={(v) => onUpdateLayer({ innerGlow: { ...layer.innerGlow!, color: v } })
+                      } />
                     <span className="font-mono text-[9px] text-rose-300">{layer.innerGlow.color}</span>
                   </div>
                 </div>
@@ -1850,14 +1732,8 @@ export const PhotoshopLayerInspector: React.FC<PhotoshopLayerInspectorProps> = (
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-slate-400">رنگ تابش نئون:</span>
                   <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={layer.outerGlow.color}
-                      onChange={(e) =>
-                        onUpdateLayer({ outerGlow: { ...layer.outerGlow!, color: e.target.value } })
-                      }
-                      className="w-6 h-6 rounded cursor-pointer bg-transparent"
-                    />
+                    <ColorField label="انتخاب رنگ" value={layer.outerGlow.color} onChange={(v) => onUpdateLayer({ outerGlow: { ...layer.outerGlow!, color: v } })
+                      } />
                     <span className="font-mono text-[9px] text-amber-300">{layer.outerGlow.color}</span>
                   </div>
                 </div>
@@ -2386,8 +2262,6 @@ const DEFAULT_STAT_CARDS = [
 
 // Keys that hold machine data (markup, images, internal ids) and must not be edited as text.
 const HIDDEN_DATA_KEYS = new Set(['svgCode', 'imageUrl', 'src', 'lockAspectRatio', 'id']);
-const HEX_COLOR = /^#[0-9a-f]{3,8}$/i;
-const toHex6 = (v: string) => (v.length === 4 ? `#${[...v.slice(1)].map((c) => c + c).join('')}` : v.slice(0, 7));
 
 /** Edits the short string/number/boolean fields of a layer's data payload. */
 const GenericDataEditor: React.FC<{ data: Record<string, any>; onChange: (key: string, value: any) => void }> = ({ data, onChange }) => {
@@ -2405,8 +2279,8 @@ const GenericDataEditor: React.FC<{ data: Record<string, any>; onChange: (key: s
           <span className="text-[10px] text-slate-400 font-mono shrink-0">{key}</span>
           {typeof value === 'boolean' ? (
             <input type="checkbox" checked={value} onChange={(e) => onChange(key, e.target.checked)} />
-          ) : typeof value === 'string' && HEX_COLOR.test(value) ? (
-            <input type="color" value={toHex6(value)} onChange={(e) => onChange(key, e.target.value)} className="w-10 h-7 bg-transparent" />
+          ) : isColor(value) ? (
+            <ColorField label={key} value={value} onChange={(v) => onChange(key, v)} />
           ) : (
             <input
               type={typeof value === 'number' ? 'number' : 'text'}
