@@ -558,17 +558,17 @@ export const LayersSidebar: React.FC<LayersSidebarProps> = ({
       {activeTab === 'layers' && (
         <div className="space-y-2">
           {/* Quick layer actions bar & New Group Folder button */}
-          <div className="flex items-center justify-between px-1 text-[10px] text-slate-400 border-b border-slate-800 pb-2">
-            <span className="font-bold text-slate-300">گروه‌ها و چیدمان:</span>
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[10px] text-slate-400 border-b border-slate-800 pb-2">
+            <span className="font-bold text-slate-300 whitespace-nowrap">گروه‌ها و چیدمان</span>
+            <div className="flex items-center gap-1.5 min-w-0">
               <button
                 type="button"
                 onClick={handleCreateGroup}
-                className="px-2.5 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-bold flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer"
                 title="ایجاد گروه جدید (New Group)"
               >
                 <FolderPlus className="w-3.5 h-3.5 text-amber-400" />
-                <span>گروه جدید (+ پوشه)</span>
+                <span>گروه جدید</span>
               </button>
             </div>
           </div>

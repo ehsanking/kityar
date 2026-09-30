@@ -68,7 +68,7 @@ export const ProductAnalyticsChart: React.FC = () => {
   };
 
   return (
-    <div className="@container bg-slate-950/90 border border-emerald-500/30 rounded-2xl p-4 space-y-4 shadow-2xl backdrop-blur-xl">
+    <div className="@container overflow-hidden bg-slate-950/90 border border-emerald-500/30 rounded-2xl p-4 space-y-4 shadow-2xl backdrop-blur-xl">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export const ProductAnalyticsChart: React.FC = () => {
       <div className="w-full h-64 bg-slate-900/60 rounded-xl p-3 border border-white/5 relative overflow-hidden">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'area' ? (
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={accentColor} stopOpacity={0.8} />
@@ -156,7 +156,7 @@ export const ProductAnalyticsChart: React.FC = () => {
               <Area type="monotone" dataKey="sales" name="فروش (تعداد)" stroke={accentColor} strokeWidth={2.5} fillOpacity={1} fill="url(#salesGrad)" />
             </AreaChart>
           ) : chartType === 'bar' ? (
-            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
               <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
               <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />

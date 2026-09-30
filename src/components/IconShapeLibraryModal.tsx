@@ -1059,27 +1059,27 @@ export const IconShapeLibraryModal: React.FC<IconShapeLibraryModalProps> = ({
       >
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+        <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-800">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-10 h-10 shrink-0 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
               <Box className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="font-black text-sm text-white flex items-center gap-2">
-                <span>کتابخانه مدل‌های سه بعدی (3D Models) و آیکون‌های ژاکت</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+            <div className="min-w-0">
+              <h3 className="font-black text-sm text-white flex flex-wrap items-center gap-2">
+                <span>کتابخانهٔ مدل‌های سه‌بعدی و آیکون‌ها</span>
+                <span className="shrink-0 whitespace-nowrap text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
                   ۱۰۰٪ رایگان
                 </span>
               </h3>
-              <p className="text-[11px] text-slate-400">
-                شامل منابع رایگان برتر Shapefest, Figma Community, DrawKit & IconScout
+              <p className="text-[11px] text-slate-400 leading-5">
+                منابع رایگان از <bdi>Shapefest</bdi>، <bdi>Figma Community</bdi>، <bdi>DrawKit</bdi> و <bdi>IconScout</bdi>
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/40 transition-colors"
+            className="shrink-0 p-2 rounded-xl bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/40 transition-colors"
             title="بستن پنجره"
           >
             <X className="w-5 h-5" />
@@ -1087,32 +1087,32 @@ export const IconShapeLibraryModal: React.FC<IconShapeLibraryModalProps> = ({
         </div>
 
         {/* Primary Modal Tabs */}
-        <div className="flex items-center gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 text-xs">
           <button
             onClick={() => setActiveTab('models3d')}
-            className={`flex-1 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`min-w-0 px-2 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
               activeTab === 'models3d'
                 ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
             <Box className="w-4 h-4" />
-            <span>مدل‌ها و المان‌های سه بعدی (3D Libraries)</span>
+            <span>مدل‌های سه‌بعدی</span>
           </button>
           <button
             onClick={() => setActiveTab('icons')}
-            className={`flex-1 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`min-w-0 px-2 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
               activeTab === 'icons'
                 ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
             <Sparkles className="w-4 h-4" />
-            <span>آیکون‌های وکتور (۲۱۳ مدل دسته‌بندی‌شده)</span>
+            <span>آیکون‌های وکتور <span className="opacity-70">(۲۱۳)</span></span>
           </button>
           <button
             onClick={() => setActiveTab('shapes')}
-            className={`flex-1 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`min-w-0 px-2 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
               activeTab === 'shapes'
                 ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                 : 'text-slate-400 hover:text-white'
@@ -1167,7 +1167,7 @@ export const IconShapeLibraryModal: React.FC<IconShapeLibraryModalProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] custom-scrollbar">
+                <div className="flex flex-wrap items-center gap-1.5 pb-1 text-[11px]">
                   {[
                     { id: 'all', label: 'همه دسته‌ها', icon: Grid },
                     { id: 'icons', label: 'آیکون‌ها (Icons)', icon: Sparkles },
@@ -1200,7 +1200,7 @@ export const IconShapeLibraryModal: React.FC<IconShapeLibraryModalProps> = ({
                 <div className="text-[10px] font-bold text-slate-400 px-1">
                   <span>منبع و کتابخانه (3D Source):</span>
                 </div>
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[10px] custom-scrollbar">
+                <div className="flex flex-wrap items-center gap-1.5 pb-0.5 text-[10px]">
                   {[
                     { id: 'all', label: 'همه منابع (All Sources)' },
                     { id: 'shapefest', label: 'Shapefest.com' },
@@ -1367,7 +1367,7 @@ export const IconShapeLibraryModal: React.FC<IconShapeLibraryModalProps> = ({
             </div>
 
             {/* Category pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] custom-scrollbar">
+            <div className="flex flex-wrap items-center gap-1.5 pb-1 text-[11px]">
               {VECTOR_ICON_CATEGORIES.map((cat) => (
                 <button
                   key={cat.id}

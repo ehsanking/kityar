@@ -1,5 +1,6 @@
 import type { CanvasLayerItem, CustomGradientConfig } from '../../types/canvasLayers';
 import type { CanvasLayersMap } from '../../store/studioStore';
+import { isColor } from '../../utils/color';
 
 export interface BrandKit {
   primary: string;
@@ -18,12 +19,11 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
 };
 
 const STORAGE_KEY = 'kityar_brand_kit';
-const HEX = /^#[0-9a-f]{6}$/i;
 
 export const isBrandKit = (v: unknown): v is BrandKit =>
   typeof v === 'object' &&
   v !== null &&
-  (['primary', 'secondary', 'accent', 'textColor'] as const).every((k) => HEX.test(String((v as any)[k]))) &&
+  (['primary', 'secondary', 'accent', 'textColor'] as const).every((k) => isColor((v as any)[k])) &&
   typeof (v as any).fontId === 'string';
 
 export function loadBrandKit(storage: Pick<Storage, 'getItem'> | undefined): BrandKit | null {

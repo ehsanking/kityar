@@ -62,7 +62,24 @@ export const FontSelector: React.FC<FontSelectorProps> = ({ selectedFontId, onSe
             styleEl.id = 'dynamic-custom-font-style';
             document.head.appendChild(styleEl);
           }
-          styleEl.innerHTML = `
+          // Also declare the font as a CSS @font-face with an inline data: URL. Fonts added only via
+          // document.fonts are invisible to html-to-image (PNG/PDF/PSD/ZIP export renders in an
+          // isolated SVG image), so without this rule exported files fell back to a default font.
+          const bytes = new Uint8Array(arrayBuffer);
+          let binary = '';
+          for (let i = 0; i < bytes.length; i += 0x8000) {
+            binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+          }
+          const ext = file.name.toLowerCase().split('.').pop();
+          const mime = ext === 'woff2' ? 'font/woff2' : ext === 'woff' ? 'font/woff' : ext === 'otf' ? 'font/otf' : 'font/ttf';
+          const format = ext === 'woff2' ? 'woff2' : ext === 'woff' ? 'woff' : ext === 'otf' ? 'opentype' : 'truetype';
+          styleEl.textContent = `
+            @font-face {
+              font-family: '${customFontFamilyName}';
+              src: url(data:${mime};base64,${btoa(binary)}) format('${format}');
+              font-weight: 100 900;
+              font-display: block;
+            }
             .font-custom-uploaded,
             .font-custom-uploaded * {
               font-family: '${customFontFamilyName}', 'Vazirmatn', sans-serif !important;

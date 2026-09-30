@@ -1,4 +1,5 @@
 import React from 'react';
+import ColorField from './ColorField';
 import {
   Move,
   Type,
@@ -228,13 +229,7 @@ export const PhotoshopOptionsBar: React.FC<PhotoshopOptionsBarProps> = ({
       <div className="flex items-center gap-1.5 shrink-0 bg-slate-950 px-2 py-1 rounded border border-slate-800">
         <span className="text-[10px] text-slate-400">رنگ:</span>
         <div className="relative flex items-center">
-          <input
-            type="color"
-            value={currentColor.startsWith('#') ? currentColor : '#fbbf24'}
-            onChange={(e) => handleColorChange(e.target.value)}
-            className="w-5 h-5 rounded cursor-pointer bg-transparent border border-slate-700 p-0"
-            title="پالت کامل رنگ فتوشاپ (Color Picker)"
-          />
+          <ColorField label="پالت کامل رنگ فتوشاپ (Color Picker)" value={currentColor.startsWith('#') ? currentColor : '#fbbf24'} onChange={(v) => handleColorChange(v)} />
         </div>
         <div className="flex items-center gap-1">
           {PRESET_COLORS.slice(0, 6).map((c) => (

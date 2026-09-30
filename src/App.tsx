@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import ColorField from './components/ColorField';
 import { 
   DndContext, 
   closestCenter, 
@@ -1546,8 +1547,9 @@ export function App() {
   const { displayWidth: activeDispW, displayHeight: activeDispH, scale: activeScale } = getWorkspaceDisplaySize(targetPlatform, activeAsset);
   const { width: activeRealW, height: activeRealH, label: activeRealLabel } = getAssetDimensions(targetPlatform, activeAsset);
 
+  // UI always uses Vazirmatn; the user-selected/uploaded font applies only to canvases and exports.
   return (
-    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col ${currentFontCss} selection:bg-amber-500 selection:text-slate-950`}>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-vazirmatn selection:bg-amber-500 selection:text-slate-950">
       
       {/* Hidden File Input for Loading Saved Projects */}
       <input
@@ -2316,12 +2318,7 @@ export function App() {
                                   className="relative cursor-pointer w-5 h-5 rounded-full border border-slate-600 bg-slate-800 flex items-center justify-center text-[9px] text-slate-300 hover:border-amber-400 hover:text-white transition-all overflow-hidden shrink-0"
                                   title="انتخاب رنگ دلخواه"
                                 >
-                                  <input
-                                    type="color"
-                                    value={crosshairColor}
-                                    onChange={(e) => setCrosshairColor(e.target.value)}
-                                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                                  />
+                                  <ColorField label="انتخاب رنگ" value={crosshairColor} onChange={(v) => setCrosshairColor(v)} />
                                   <span>+</span>
                                 </label>
                               </div>
@@ -2433,9 +2430,9 @@ export function App() {
                 </div>
 
                 {/* Edit & Precision Nudge Hint */}
-                <div className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-slate-950/85 border border-emerald-500/40 px-3 py-1 rounded-full text-[10px] text-emerald-300 backdrop-blur-md shadow-lg">
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 hidden md:flex items-center gap-1.5 max-w-[calc(100%-1.5rem)] bg-slate-950/85 border border-emerald-500/40 px-3 py-1 rounded-full text-[10px] text-emerald-300 backdrop-blur-md shadow-lg pointer-events-none">
                   <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>درگ دقیق با تراز مغناطیسی | کلیدهای جهت‌نما: دقت ۱ پیکسل (Shift = ۱۰px)</span>
+                  <span className="truncate">درگ با تراز مغناطیسی · کلیدهای جهت‌نما: ۱ پیکسل · با Shift: ۱۰ پیکسل</span>
                 </div>
 
                 {/* 1. UNIFIED DYNAMIC ASSET CANVAS (LOGO, COVER, SLIDERS, CUSTOM SIZES) */}
@@ -2467,7 +2464,7 @@ export function App() {
                             height: activeDispH,
                             ...getDynamicBackgroundStyle()
                           }}
-                          className="rounded-xl border-2 border-amber-500/70 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-visible group transition-all shrink-0 select-none ring-1 ring-amber-400/40" 
+                          className={`rounded-xl border-2 border-amber-500/70 flex flex-col items-center justify-center text-center shadow-2xl relative isolate overflow-visible group transition-all shrink-0 select-none ring-1 ring-amber-400/40 ${currentFontCss}`}
                         >
                           {currentLayers.filter(l => l.type !== 'background').map(l => (
                             <DynamicLayerRenderer
@@ -2636,7 +2633,7 @@ export function App() {
               <div className="space-y-3">
                 
                 {/* Photoshop Studio Dock Tab Navigation Bar */}
-                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex items-center justify-between overflow-x-auto gap-1 shadow-xl">
+                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-wrap items-center gap-1 shadow-xl" role="tablist" aria-label="پنل‌های استودیو">
                   {[
                     { id: 'layers', label: 'لایه‌ها', icon: Layers, color: 'text-amber-400' },
                     { id: 'badges', label: 'بج‌های ژاکت', icon: ShieldCheck, color: 'text-emerald-400' },
@@ -2913,7 +2910,7 @@ export function App() {
             ] as const).map(([key, label]) => (
               <label key={key} className="flex items-center justify-between text-xs text-slate-300">
                 <span>{label}</span>
-                <input type="color" value={brandKit[key]} onChange={(e) => setBrandKit((k) => ({ ...k, [key]: e.target.value }))} className="w-12 h-8 rounded bg-transparent" />
+                <ColorField label={label} showText value={brandKit[key]} onChange={(v) => setBrandKit((k) => ({ ...k, [key]: v }))} />
               </label>
             ))}
             <label className="flex items-center justify-between text-xs text-slate-300">
