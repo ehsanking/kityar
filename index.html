@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>کیت یار — اتوماسیون طراحی هوشمند و ارزیابی استانداردهای چندگانه</title>
+    <meta name="description" content="کیت یار: اتوماسیون جامع طراحی، تولید هوش مصنوعی و ارزیابی استاندارد تصاویر و کاورهای ژاکت، راست‌چین، کافه بازار و مایکت با موکاپ‌های مدرن و استودیو زنده." />
+    <meta property="og:title" content="کیت یار — اتوماسیون طراحی هوشمند و ارزیابی استانداردهای چندگانه" />
+    <meta property="og:description" content="کیت یار: اتوماسیون جامع طراحی، تولید هوش مصنوعی و ارزیابی استاندارد تصاویر و کاورهای ژاکت، راست‌چین، کافه بازار و مایکت با موکاپ‌های مدرن و استودیو زنده." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      // Suppress benign Vite HMR WebSocket connection errors and unhandled rejections in iframe/sandbox environment
+      (function() {
+        function isWsError(msg) {
+          if (!msg) return false;
+          var s = String(msg).toLowerCase();
+          return s.indexOf('websocket') !== -1 || s.indexOf('[vite]') !== -1 || s.indexOf('closed without opened') !== -1;
+        }
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event && event.reason;
+          var msg = (reason && (reason.message || reason.description || String(reason))) || '';
+          if (isWsError(msg)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return false;
+          }
+        }, true);
+        window.addEventListener('error', function(event) {
+          var msg = (event && (event.message || '')) || '';
+          var target = event && event.target;
+          var isWebSocketTarget = target && (target.tagName === undefined && (String(target.url || '').indexOf('ws') !== -1 || String(target.src || '').indexOf('ws') !== -1));
+          if (isWsError(msg) || isWebSocketTarget) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return false;
+          }
+        }, true);
+        var origConsoleError = console.error;
+        console.error = function() {
+          var args = Array.prototype.slice.call(arguments);
+          var text = args.map(function(a) { return String(a && a.message ? a.message : a); }).join(' ');
+          if (isWsError(text)) {
+            return;
+          }
+          origConsoleError.apply(console, arguments);
+        };
+      })();
+    </script>
+  </head>
+  <body class="bg-slate-950 text-slate-100 font-['Vazirmatn'] selection:bg-amber-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

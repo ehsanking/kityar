@@ -1,0 +1,83 @@
+<svg viewBox="0 0 1440 1020" width="1440" height="1020" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Official Zhaket Identity (6145a4f5efbebd3547706722.png) -->
+  
+  <!-- 1. Left Two Diamond Dots -->
+  <rect x="235" y="155" width="76" height="76" transform="rotate(45 273 193)" fill="#414042" />
+  <rect x="235" y="275" width="76" height="76" transform="rotate(45 273 313)" fill="#414042" />
+
+  <!-- 2. Left Persian Calligraphic Swoosh (ژ) -->
+  <path
+    d="M 152 238 
+       C 142 280, 5 365, 5 490
+       C 5 625, 115 675, 480 675
+       L 660 675
+       L 660 635
+       L 480 635
+       C 185 635, 45 590, 45 490
+       C 45 400, 118 315, 152 238 Z"
+    fill="#414042"
+  />
+
+  <path
+    d="M 5 490
+       C 5 645, 120 742, 475 742
+       L 730 742
+       L 730 935
+       L 692 935
+       L 692 780
+       L 475 780
+       C 140 780, 42 665, 42 490 Z"
+    fill="#414042"
+  />
+
+  <!-- 3. Typography "ZHAKET" -->
+  <g transform="translate(4, 720)">
+    <!-- Z in Bright Orange -->
+    <path d="M 5 0 L 102 0 L 102 24 L 38 98 L 105 98 L 105 125 L 0 125 L 0 102 L 64 27 L 5 27 Z" fill="#F7941D" />
+    
+    <!-- H in Dark Charcoal -->
+    <path d="M 120 0 L 152 0 L 152 48 L 195 48 L 195 0 L 227 0 L 227 125 L 195 125 L 195 75 L 152 75 L 152 125 L 120 125 Z" fill="#414042" />
+    
+    <!-- A in Dark Charcoal -->
+    <path d="M 275 0 L 310 0 L 355 125 L 320 125 L 309 94 L 273 94 L 262 125 L 230 125 Z M 281 70 L 301 70 L 291 38 Z" fill="#414042" />
+    
+    <!-- K in Dark Charcoal -->
+    <path d="M 368 0 L 400 0 L 400 48 L 442 0 L 483 0 L 434 56 L 487 125 L 446 125 L 409 74 L 400 84 L 400 125 L 368 125 Z" fill="#414042" />
+    
+    <!-- E in Dark Charcoal -->
+    <path d="M 498 0 L 580 0 L 580 27 L 530 27 L 530 48 L 575 48 L 575 75 L 530 75 L 530 98 L 582 98 L 582 125 L 498 125 Z" fill="#414042" />
+    
+    <!-- T in Dark Charcoal -->
+    <path d="M 590 0 L 684 0 L 684 27 L 653 27 L 653 125 L 621 125 L 621 27 L 590 27 Z" fill="#414042" />
+  </g>
+
+  <!-- 4. Light Grey Underline Bar -->
+  <rect x="4" y="900" width="656" height="38" rx="6" fill="#A7A9AC" />
+
+  <!-- 5. Right Origami Isometric Coat Structure -->
+  <!-- Top Outer Diagonal Framework -->
+  <path d="M 700 268 L 1080 5 L 1080 162 L 900 274 L 900 310 L 1080 196 L 1080 252 L 742 462 L 700 435 Z" fill="#414042" />
+  
+  <!-- Central Orange Folded Facet -->
+  <path d="M 742 330 L 1080 538 L 986 596 L 742 440 Z" fill="#F7941D" />
+  
+  <!-- Center Charcoal Frame -->
+  <path d="M 700 460 L 1080 700 L 1080 638 L 742 430 Z" fill="#414042" />
+
+  <!-- Vertical Right Pillar -->
+  <path d="M 1120 50 L 1280 148 L 1280 550 L 1238 576 L 1238 206 L 1162 158 L 1162 476 L 1120 500 Z" fill="#414042" />
+
+  <!-- Mid Diagonal Charcoal Slabs -->
+  <path d="M 785 715 L 1080 530 L 1280 405 L 1320 430 L 1120 555 L 1120 690 L 1080 715 L 1080 590 L 785 775 Z" fill="#414042" />
+
+  <!-- Lower Orange Stripe -->
+  <path d="M 785 950 L 1080 765 L 1080 720 L 785 905 Z" fill="#F7941D" />
+
+  <!-- Bottom Dark Charcoal Parallel Capsule -->
+  <path d="M 1045 918 C 1035 930 1035 948 1045 960 C 1055 972 1075 972 1085 960 L 1340 802 C 1350 790 1350 772 1340 760 C 1330 748 1310 748 1300 760 Z" fill="#414042" />
+
+  <!-- 6. Three Right Diamond Dots -->
+  <rect x="1340" y="165" width="94" height="94" transform="rotate(45 1387 212)" fill="#414042" />
+  <rect x="1340" y="275" width="94" height="94" transform="rotate(45 1387 322)" fill="#414042" />
+  <rect x="1340" y="385" width="94" height="94" transform="rotate(45 1387 432)" fill="#414042" />
+</svg>

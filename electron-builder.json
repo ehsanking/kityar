@@ -1,0 +1,59 @@
+{
+  "appId": "com.kityar.studio",
+  "productName": "KitYar",
+  "copyright": "Copyright © 2026 EHSANKiNG",
+  "directories": {
+    "output": "dist-electron"
+  },
+  "files": [
+    "dist/**/*",
+    "electron.js",
+    "api/**/*",
+    "package.json",
+    "resources/icon.png"
+  ],
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "ehsanking",
+      "repo": "kityar"
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "portable"
+      }
+    ],
+    "icon": "resources/icon.png"
+  },
+  "mac": {
+    "target": [
+      {
+        "target": "dmg",
+        "arch": [
+          "arm64",
+          "x64"
+        ]
+      }
+    ],
+    "category": "public.app-category.graphics-design",
+    "icon": "resources/icon.png"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": "always",
+    "createStartMenuShortcut": true,
+    "shortcutName": "KitYar Studio"
+  },
+  "dmg": {
+    "artifactName": "KitYar-${version}-mac-${arch}.${ext}"
+  }
+}

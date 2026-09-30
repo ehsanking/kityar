@@ -1,0 +1,65 @@
+name: Build and Publish Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*' # e.g. v1.0.0 → builds and publishes a GitHub Release
+  workflow_dispatch: # manual run → builds installers as a downloadable artifact only
+
+permissions:
+  contents: write # required to create the GitHub Release and upload assets
+
+jobs:
+  release:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+
+      - name: Build web app
+        run: npm run build
+
+      # No Apple Developer certificate: skip keychain lookup; the app is ad-hoc signed.
+      - name: Disable code-sign identity discovery
+        if: runner.os == 'macOS'
+        run: echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> "$GITHUB_ENV"
+
+      # Tag push: publish installers to the GitHub Release for this tag.
+      - name: Package & publish
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: npx electron-builder --config electron-builder.json --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Manual run: build only; installers are attached to the workflow run.
+      - name: Package (no publish)
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: npx electron-builder --config electron-builder.json --publish never
+
+      - name: Upload installers
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kityar-${{ matrix.os }}
+          path: |
+            dist-electron/*.exe
+            dist-electron/*.dmg
+          if-no-files-found: error
+          retention-days: 14
