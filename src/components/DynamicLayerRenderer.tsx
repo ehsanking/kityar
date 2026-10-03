@@ -1301,6 +1301,40 @@ export const DynamicLayerRenderer: React.FC<DynamicLayerRendererProps> = ({
           );
         }
 
+        if (mockupType === 'desktop') {
+          return (
+            <div className="flex flex-col items-center w-64 select-none">
+              <div className={`w-full h-44 rounded-2xl p-2 border-4 shadow-2xl backdrop-blur-md ${frameBg}`}>
+                <div className="w-full h-full rounded-xl overflow-hidden bg-slate-950">
+                  {renderScreen()}
+                </div>
+              </div>
+              <div className="w-6 h-8 bg-slate-700 border-x border-slate-600" />
+              <div className="w-24 h-2 bg-slate-600 rounded-full shadow-md" />
+            </div>
+          );
+        }
+
+        if (mockupType === 'browser') {
+          return (
+            <div className="w-60 h-44 rounded-2xl border-2 border-slate-700 bg-slate-900 shadow-2xl overflow-hidden flex flex-col select-none">
+              <div className="bg-slate-800 px-3 py-1.5 flex items-center justify-between border-b border-slate-700">
+                <div className="flex items-center gap-1.5" aria-hidden="true">
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                </div>
+                <span className="bg-slate-950 px-3 py-0.5 rounded text-[8px] text-slate-400 font-mono">
+                  https://yourstore.com
+                </span>
+              </div>
+              <div className="flex-1 min-h-0 bg-slate-950">
+                {renderScreen()}
+              </div>
+            </div>
+          );
+        }
+
         return (
           <div className="w-36 h-48 rounded-xl bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 border-2 border-amber-400 p-3 flex flex-col justify-between shadow-2xl text-white">
             <Box className="w-5 h-5 text-amber-300" />
