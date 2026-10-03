@@ -77,7 +77,7 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
           </div>
           <div>
             <h4 className="font-bold text-white text-xs">کامپوزر موکاپ‌های سه‌بعدی</h4>
-            <p className="text-[10px] text-slate-400">افزودن انواع فریم گوشی، تبلت، لپ‌تاپ و باکس محصول به بوم</p>
+            <p className="text-[11px] leading-5 text-slate-300">افزودن فریم گوشی، تبلت، لپ‌تاپ، دسکتاپ، مرورگر و باکس سه‌بعدی به کاور</p>
           </div>
         </div>
 
@@ -97,11 +97,13 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
               <button
                 key={m.id}
                 type="button"
+                aria-pressed={isSelected}
+                title={m.title}
                 onClick={() => {
                   setSelectedType(m.id);
                   setScale(m.defaultScale);
                 }}
-                className={`p-2 rounded-xl border text-right transition-all flex flex-col gap-1 ${
+                className={`min-h-14 p-2.5 rounded-xl border text-right transition-colors flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
                   isSelected
                     ? 'bg-indigo-600 text-white border-indigo-400 shadow-md font-bold'
                     : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800/80 hover:text-white'
@@ -111,7 +113,7 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
                   <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-indigo-400'}`} />
                   {isSelected && <Check className="w-3 h-3 text-white" />}
                 </div>
-                <span className="text-[10px] truncate">{m.title.split(' ')[0]} {m.title.split(' ')[1] || ''}</span>
+                <span className="text-[11px] leading-4">{m.title.split(' ')[0]} {m.title.split(' ')[1] || ''}</span>
               </button>
             );
           })}
@@ -134,7 +136,7 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
             <button
               type="button"
               onClick={() => setScreenPreview(null)}
-              className="text-[10px] text-rose-400 hover:text-rose-300 flex items-center gap-1"
+              className="min-h-10 px-2 text-[11px] text-rose-300 hover:text-rose-200 flex items-center gap-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
             >
               <Trash2 className="w-3 h-3" />
               <span>حذف تصویر</span>
@@ -160,7 +162,7 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full py-2.5 px-3 rounded-xl border border-dashed border-indigo-500/40 hover:border-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-300 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all"
+            className="w-full min-h-11 py-2.5 px-3 rounded-xl border border-dashed border-indigo-500/40 hover:border-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-200 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>آپلود اسکرین‌شات / عکس دلخواه برای صفحه موکاپ</span>
@@ -171,7 +173,7 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
       {/* 3. Frame Style & Perspective */}
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] text-slate-400 mb-1 block">رنگ فریم:</label>
+          <label className="text-[10px] text-slate-300 mb-1 block">رنگ فریم:</label>
           <div className="grid grid-cols-4 gap-1">
             {[
               { id: 'dark', label: 'تیره', color: '#0f172a' },
@@ -182,8 +184,10 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
               <button
                 key={c.id}
                 type="button"
+                aria-label={`رنگ فریم ${c.label}`}
+                aria-pressed={frameColor === c.id}
                 onClick={() => setFrameColor(c.id as any)}
-                className={`h-7 rounded-lg border flex items-center justify-center transition-all ${
+                className={`min-h-11 rounded-lg border flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
                   frameColor === c.id ? 'border-amber-400 ring-2 ring-amber-500/50' : 'border-slate-800'
                 }`}
                 style={{ backgroundColor: c.color }}
@@ -194,14 +198,15 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
         </div>
 
         <div>
-          <label className="text-[10px] text-slate-400 mb-1 block">زاویه سه‌بعدی:</label>
+          <label className="text-[10px] text-slate-300 mb-1 block">زاویه سه‌بعدی:</label>
           <button
             type="button"
+            aria-pressed={tilt3D}
             onClick={() => setTilt3D(!tilt3D)}
-            className={`w-full h-7 rounded-lg text-[10px] font-bold border transition-all flex items-center justify-center gap-1 ${
+            className={`w-full min-h-11 rounded-lg text-[11px] font-bold border transition-colors flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
               tilt3D
                 ? 'bg-amber-500 text-slate-950 border-amber-400 font-black'
-                : 'bg-slate-900 text-slate-400 border-slate-800'
+                : 'bg-slate-900 text-slate-300 border-slate-800'
             }`}
           >
             <span>{tilt3D ? 'پرسپکتیو ایزومتریک' : 'تخت ۲ بعدی (Flat)'}</span>
@@ -213,7 +218,7 @@ export const MockupComposer: React.FC<MockupComposerProps> = ({ onAddMockup }) =
       <button
         type="button"
         onClick={handleCreateAndAdd}
-        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all transform active:scale-95"
+        className="w-full min-h-11 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-600/20 flex items-center justify-center gap-2 transition-colors active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
       >
         <Plus className="w-4 h-4" />
         <span>افزودن این موکاپ به لایه‌های بوم</span>

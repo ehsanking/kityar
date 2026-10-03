@@ -146,9 +146,6 @@ export function App() {
     };
   };
   
-  // Accordion state for quick access in Studio sidebar
-  const [openStudioPanel, setOpenStudioPanel] = useState<'mockup' | 'ai' | 'gradient' | 'font' | 'logo' | 'image' | 'konva' | 'chart' | null>(null);
-
   // Logo Config State
   const [logoConfig, setLogoConfig] = useState<ZhaketLogoConfig>(DEFAULT_LOGO_CONFIG);
 
@@ -271,7 +268,7 @@ export function App() {
   const [exportProgressText, setExportProgressText] = useState<string>('');
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
   const [isLivePreviewOpen, setIsLivePreviewOpen] = useState(false);
-  const [sidebarActiveTab, setSidebarActiveTab] = useState<'layers' | 'badges' | 'logo' | 'gradient' | 'typography' | 'image' | 'ai' | 'konva' | 'chart'>('layers');
+  const [sidebarActiveTab, setSidebarActiveTab] = useState<'layers' | 'mockup' | 'badges' | 'logo' | 'gradient' | 'typography' | 'image' | 'ai' | 'konva' | 'chart'>('layers');
 
   // Precision Dragging & Snapping Settings
   const [enableMagneticSnap, setEnableMagneticSnap] = useState(true);
@@ -566,6 +563,16 @@ export function App() {
 
   const handleAddMockupLayer = (mockupConfig: Partial<CanvasLayerItem>) => {
     const newId = `mockup-${Date.now()}`;
+    const mockupType = mockupConfig.data?.mockupType || 'mobile';
+    const mockupSize = {
+      mobile: { width: 128, height: 256 },
+      tablet: { width: 192, height: 256 },
+      laptop: { width: 256, height: 154 },
+      desktop: { width: 256, height: 216 },
+      browser: { width: 240, height: 176 },
+      box3d: { width: 144, height: 192 },
+    }[mockupType];
+    const { displayWidth, displayHeight } = getWorkspaceDisplaySize(targetPlatform, activeAsset);
     const newLayer: CanvasLayerItem = {
       id: newId,
       name: mockupConfig.name || 'موکاپ جدید',
@@ -576,8 +583,8 @@ export function App() {
       scale: mockupConfig.scale || 0.9,
       rotation: mockupConfig.rotation || 0,
       opacity: mockupConfig.opacity || 100,
-      x: 140,
-      y: 70,
+      x: Math.max(0, Math.round((displayWidth - mockupSize.width) / 2)),
+      y: Math.max(0, Math.round((displayHeight - mockupSize.height) / 2)),
       data: mockupConfig.data || {},
     };
 
@@ -2658,9 +2665,10 @@ export function App() {
               <div className="space-y-3">
                 
                 {/* Photoshop Studio Dock Tab Navigation Bar */}
-                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-wrap items-center gap-1 shadow-xl" role="tablist" aria-label="پنل‌های استودیو">
+                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-nowrap items-center gap-1 overflow-x-auto custom-scrollbar shadow-xl" role="group" aria-label="پنل‌های استودیو">
                   {[
                     { id: 'layers', label: 'لایه‌ها', icon: Layers, color: 'text-amber-400' },
+                    { id: 'mockup', label: 'موکاپ‌ها', icon: Smartphone, color: 'text-indigo-400' },
                     { id: 'badges', label: 'بج‌های ژاکت', icon: ShieldCheck, color: 'text-emerald-400' },
                     { id: 'logo', label: 'لوگو و کادر', icon: ShoppingBag, color: 'text-orange-400' },
                     { id: 'gradient', label: 'گرادیانت', icon: Palette, color: 'text-purple-400' },
@@ -2677,7 +2685,8 @@ export function App() {
                         key={tab.id}
                         type="button"
                         onClick={() => setSidebarActiveTab(tab.id as any)}
-                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                        aria-pressed={isActive}
+                        className={`min-h-10 px-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
                           isActive
                             ? 'bg-amber-500 text-slate-950 font-black shadow-md'
                             : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
@@ -2739,6 +2748,12 @@ export function App() {
                       onReorderLayers={handleReorderLayers}
                       onOpenIconModal={() => setIsIconLibraryModalOpen(true)}
                     />
+                  </div>
+                )}
+
+                {sidebarActiveTab === 'mockup' && (
+                  <div className="animate-in fade-in duration-150">
+                    <MockupComposer onAddMockup={handleAddMockupLayer} />
                   </div>
                 )}
 
