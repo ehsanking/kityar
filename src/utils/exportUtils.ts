@@ -1,7 +1,13 @@
-import { toPng, toCanvas, toBlob } from 'html-to-image';
+import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import JSZip from 'jszip';
 import { writePsd } from 'ag-psd';
+import {
+  getCapturePixelRatio,
+  resizeCanvasToDimensions,
+  type ExportDimensions,
+  type ExportTarget,
+} from './exportDimensions';
 
 /**
  * Converts any oklch(...) or modern color space string to standard rgb(...) / rgba(...)
@@ -168,11 +174,18 @@ export async function validateAndPreloadElement(element: HTMLElement, timeoutMs:
  * Capture HTML element to high-res Canvas using native browser rasterization
  * with rigorous pre-validation and oklch-to-rgb sanitization.
  */
-export async function captureElementToCanvas(element: HTMLElement, pixelRatio: number = 2): Promise<HTMLCanvasElement> {
+export async function captureElementToCanvas(
+  element: HTMLElement,
+  pixelRatio: number = 2,
+  outputDimensions?: ExportDimensions,
+): Promise<HTMLCanvasElement> {
   await validateAndPreloadElement(element);
 
-  return await toCanvas(element, {
-    pixelRatio,
+  const targetPixelRatio = outputDimensions
+    ? getCapturePixelRatio(element.offsetWidth, element.offsetHeight, outputDimensions)
+    : pixelRatio;
+  const canvas = await toCanvas(element, {
+    pixelRatio: targetPixelRatio,
     cacheBust: true,
     backgroundColor: undefined,
     style: {
@@ -192,6 +205,8 @@ export async function captureElementToCanvas(element: HTMLElement, pixelRatio: n
       return true;
     },
   });
+
+  return outputDimensions ? resizeCanvasToDimensions(canvas, outputDimensions) : canvas;
 }
 
 /**
@@ -199,32 +214,11 @@ export async function captureElementToCanvas(element: HTMLElement, pixelRatio: n
  */
 export async function exportToPng(
   element: HTMLElement, 
-  filename: string = 'zhaket-asset.png', 
-  pixelRatio: number = 2
+  filename: string = 'zhaket-asset.png',
+  outputDimensions?: ExportDimensions,
 ): Promise<void> {
-  await validateAndPreloadElement(element);
-
-  const dataUrl = await toPng(element, {
-    pixelRatio,
-    cacheBust: true,
-    backgroundColor: undefined,
-    style: {
-      border: 'none',
-      boxShadow: 'none',
-      outline: 'none',
-      overflow: 'hidden',
-    },
-    filter: (domNode: HTMLElement) => {
-      if (domNode.getAttribute && domNode.getAttribute('data-export-ignore') === 'true') return false;
-      const classStr = domNode.className || '';
-      if (typeof classStr === 'string') {
-        if (classStr.includes('export-ignore')) return false;
-        if (classStr.includes('smart-snap-guide')) return false;
-        if (classStr.includes('precision-drag-badge')) return false;
-      }
-      return true;
-    },
-  });
+  const canvas = await captureElementToCanvas(element, 2, outputDimensions);
+  const dataUrl = canvas.toDataURL('image/png');
   
   const link = document.createElement('a');
   link.download = filename.endsWith('.png') ? filename : `${filename}.png`;
@@ -240,11 +234,10 @@ export async function exportToPng(
 export async function exportToPdf(
   element: HTMLElement, 
   filename: string = 'zhaket-asset.pdf', 
-  title: string = 'Zhaket Yar Asset Document'
+  title: string = 'Zhaket Yar Asset Document',
+  outputDimensions?: ExportDimensions,
 ): Promise<void> {
-  await validateAndPreloadElement(element);
-
-  const canvas = await captureElementToCanvas(element, 2);
+  const canvas = await captureElementToCanvas(element, 2, outputDimensions);
   const imgData = canvas.toDataURL('image/png', 1.0);
   
   const isLandscape = canvas.width > canvas.height;
@@ -268,11 +261,10 @@ export async function exportToPdf(
  */
 export async function exportToPsd(
   element: HTMLElement, 
-  filename: string = 'zhaket-asset.psd'
+  filename: string = 'zhaket-asset.psd',
+  outputDimensions?: ExportDimensions,
 ): Promise<void> {
-  await validateAndPreloadElement(element);
-
-  const canvas = await captureElementToCanvas(element, 2);
+  const canvas = await captureElementToCanvas(element, 2, outputDimensions);
   
   // Convert HTMLCanvas to PSD structure
   const psd = {
@@ -304,9 +296,9 @@ export async function exportToPsd(
  * with rigorous pre-export validation on each asset.
  */
 export async function exportFullPackageZip(
-  elementsMap: { [key: string]: HTMLElement },
+  elementsMap: { [key: string]: ExportTarget },
   productName: string,
-  onProgress?: (progress: number, statusText: string) => void
+  onProgress?: (progress: number, statusText: string) => void,
 ): Promise<void> {
   const zip = new JSZip();
   const safeName = productName.replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_');
@@ -316,7 +308,8 @@ export async function exportFullPackageZip(
   const entries = Object.entries(elementsMap);
   let completed = 0;
 
-  for (const [key, element] of entries) {
+  for (const [key, target] of entries) {
+    const { element, dimensions } = target;
     if (!element) continue;
     
     onProgress?.(
@@ -325,40 +318,17 @@ export async function exportFullPackageZip(
     );
 
     try {
-      // 1. Run Pre-export Validation
-      await validateAndPreloadElement(element);
-
       onProgress?.(
         Math.round((completed / entries.length) * 100) + 5,
         `تولید خروجی PNG، PDF و PSD برای ${key}...`
       );
 
-      // 2. Generate PNG data url directly
-      const pngDataUrl = await toPng(element, { 
-        pixelRatio: 2, 
-        cacheBust: true,
-        style: {
-          border: 'none',
-          boxShadow: 'none',
-          outline: 'none',
-          overflow: 'hidden',
-        },
-        filter: (domNode: HTMLElement) => {
-          if (domNode.getAttribute && domNode.getAttribute('data-export-ignore') === 'true') return false;
-          const classStr = domNode.className || '';
-          if (typeof classStr === 'string') {
-            if (classStr.includes('export-ignore')) return false;
-            if (classStr.includes('smart-snap-guide')) return false;
-            if (classStr.includes('precision-drag-badge')) return false;
-          }
-          return true;
-        },
-      });
+      const canvas = await captureElementToCanvas(element, 2, dimensions);
+      const pngDataUrl = canvas.toDataURL('image/png', 1.0);
       const pngBase64 = pngDataUrl.split(',')[1];
       folder.file(`${key}.png`, pngBase64, { base64: true });
 
       // 3. Generate PDF
-      const canvas = await captureElementToCanvas(element, 2);
       const isLandscape = canvas.width > canvas.height;
       const pdf = new jsPDF({
         orientation: isLandscape ? 'landscape' : 'portrait',
@@ -410,7 +380,7 @@ export async function exportFullPackageZip(
 export async function exportBatchZip<T>(
   rows: T[],
   folderName: (row: T, index: number) => string,
-  renderRow: (row: T) => Promise<{ [key: string]: HTMLElement }>,
+  renderRow: (row: T) => Promise<{ [key: string]: ExportTarget }>,
   onProgress?: (done: number, total: number) => void,
   signal?: AbortSignal,
 ): Promise<number> {
@@ -428,15 +398,9 @@ export async function exportBatchZip<T>(
 
     const folder = zip.folder(name)!;
     const elements = await renderRow(rows[i]);
-    for (const [key, element] of Object.entries(elements)) {
-      await validateAndPreloadElement(element);
-      const dataUrl = await toPng(element, {
-        pixelRatio: 2,
-        cacheBust: true,
-        filter: (node: HTMLElement) =>
-          !(node.getAttribute?.('data-export-ignore') === 'true' ||
-            (typeof node.className === 'string' && /export-ignore|smart-snap-guide|precision-drag-badge/.test(node.className))),
-      });
+    for (const [key, target] of Object.entries(elements)) {
+      const canvas = await captureElementToCanvas(target.element, 2, target.dimensions);
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
       folder.file(`${key}.png`, dataUrl.split(',')[1], { base64: true });
     }
     exported++;

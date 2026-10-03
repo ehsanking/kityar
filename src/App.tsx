@@ -55,9 +55,10 @@ const ProductAnalyticsChart = lazy(() => import('./components/ProductAnalyticsCh
 import { getInitialTemplateLayers, getBlankCanvasLayers, DEFAULT_INFOGRAPHIC_ROWS } from './data/studioTemplates';
 import { useStudioStore, onPersistError } from './store';
 import { parseProjectFile, MAX_PROJECT_FILE_BYTES } from './store/projectFile';
-import { getAssetSpec, MARKETPLACES } from './features/marketplace/specs';
+import { getAssetSpec, MARKETPLACES, type AssetId } from './features/marketplace/specs';
 import { checkCompliance, type ComplianceReport } from './features/marketplace/compliance';
 import { measureLayers } from './features/marketplace/measure';
+import { getExportAssetKey, type ExportDimensions, type ExportTarget } from './utils/exportDimensions';
 import { parseCsv } from './features/batch/csv';
 import { useTemplateVars } from './features/batch/template';
 import { BrandKit, DEFAULT_BRAND_KIT, applyBrandToLayers, brandGradient, loadBrandKit, saveBrandKit } from './features/brand/brandKit';
@@ -103,6 +104,11 @@ export function App() {
   const getAssetDimensions = (platform: string, assetId: string) => {
     const { width, height, label } = getAssetSpec(platform, assetId, { width: customWidth, height: customHeight });
     return { width, height, label };
+  };
+
+  const getAssetExportDimensions = (assetId: AssetId): ExportDimensions => {
+    const { width, height } = getAssetDimensions(targetPlatform, assetId);
+    return { width, height };
   };
 
   // Real compliance check of the active asset against the target marketplace spec.
@@ -1359,12 +1365,11 @@ export function App() {
       // 2. Allow React to re-render without selection ring
       await new Promise((resolve) => setTimeout(resolve, 80));
 
-      // 3. Compute appropriate pixelRatio for high-resolution output matching Zhaket specs
-      const { width: realW } = getAssetDimensions(targetPlatform, activeAsset);
-      const { displayWidth } = getWorkspaceDisplaySize(targetPlatform, activeAsset);
-      const pixelRatio = (realW / displayWidth) * 2; // 2x crispiness for high-res HD output
-
-      await (await loadExportUtils()).exportToPng(el, `zhaket-${activeAsset}-${Date.now()}.png`, pixelRatio);
+      await (await loadExportUtils()).exportToPng(
+        el,
+        `zhaket-${activeAsset}-${Date.now()}.png`,
+        getAssetExportDimensions(activeAsset),
+      );
       setToastMessage('فایل PNG دقیقاً عینا مطابق بوم طراحی با کیفیت عالی دانلود شد.');
     } catch (err: any) {
       console.error(err);
@@ -1391,7 +1396,12 @@ export function App() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 80));
-      await (await loadExportUtils()).exportToPdf(el, `zhaket-${activeAsset}-${Date.now()}.pdf`);
+      await (await loadExportUtils()).exportToPdf(
+        el,
+        `zhaket-${activeAsset}-${Date.now()}.pdf`,
+        undefined,
+        getAssetExportDimensions(activeAsset),
+      );
       setToastMessage('فایل PDF با آخرین تغییرات بوم دانلود شد.');
     } catch (err: any) {
       console.error(err);
@@ -1418,7 +1428,11 @@ export function App() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 80));
-      await (await loadExportUtils()).exportToPsd(el, `zhaket-${activeAsset}-${Date.now()}.psd`);
+      await (await loadExportUtils()).exportToPsd(
+        el,
+        `zhaket-${activeAsset}-${Date.now()}.psd`,
+        getAssetExportDimensions(activeAsset),
+      );
       setToastMessage('فایل لایه‌باز PSD فتوشاپ با موفقیت دانلود شد.');
     } catch (err: any) {
       console.error(err);
@@ -1431,35 +1445,42 @@ export function App() {
   };
 
   const collectExportMap = () => {
-    const map: { [key: string]: HTMLElement } = {};
+    const map: { [key: string]: ExportTarget } = {};
+    const add = (prefix: string, assetId: AssetId, element: HTMLElement | null) => {
+      if (!element) return;
+      const dimensions = getAssetExportDimensions(assetId);
+      const key = getExportAssetKey(prefix, dimensions);
+      map[key] = { element, dimensions };
+    };
+
     if (activeAsset === 'logo80' && activeLiveCanvasRef.current) {
-      map['1_logo80x80'] = activeLiveCanvasRef.current;
-    } else if (exportLogo80Ref.current) {
-      map['1_logo80x80'] = exportLogo80Ref.current;
+      add('1_logo', 'logo80', activeLiveCanvasRef.current);
+    } else {
+      add('1_logo', 'logo80', exportLogo80Ref.current);
     }
 
     if (activeAsset === 'cover400' && activeLiveCanvasRef.current) {
-      map['2_cover400x400'] = activeLiveCanvasRef.current;
-    } else if (exportCover400Ref.current) {
-      map['2_cover400x400'] = exportCover400Ref.current;
+      add('2_cover400', 'cover400', activeLiveCanvasRef.current);
+    } else {
+      add('2_cover400', 'cover400', exportCover400Ref.current);
     }
 
     if (activeAsset === 'cover700_1' && activeLiveCanvasRef.current) {
-      map['3_cover700_feature1'] = activeLiveCanvasRef.current;
-    } else if (exportCover700_1Ref.current) {
-      map['3_cover700_feature1'] = exportCover700_1Ref.current;
+      add('3_cover700_feature1', 'cover700_1', activeLiveCanvasRef.current);
+    } else {
+      add('3_cover700_feature1', 'cover700_1', exportCover700_1Ref.current);
     }
 
     if (activeAsset === 'cover700_2' && activeLiveCanvasRef.current) {
-      map['4_cover700_feature2'] = activeLiveCanvasRef.current;
-    } else if (exportCover700_2Ref.current) {
-      map['4_cover700_feature2'] = exportCover700_2Ref.current;
+      add('4_cover700_feature2', 'cover700_2', activeLiveCanvasRef.current);
+    } else {
+      add('4_cover700_feature2', 'cover700_2', exportCover700_2Ref.current);
     }
 
     if (exportInfographicRef.current) {
-      map['5_infographic_594x4000'] = exportInfographicRef.current;
+      add('5_infographic', 'infographic', exportInfographicRef.current);
     } else if (activeAsset === 'infographic' && activeLiveCanvasRef.current) {
-      map['5_infographic_594x4000'] = activeLiveCanvasRef.current;
+      add('5_infographic', 'infographic', activeLiveCanvasRef.current);
     }
 
     return map;
@@ -1546,6 +1567,10 @@ export function App() {
 
   const { displayWidth: activeDispW, displayHeight: activeDispH, scale: activeScale } = getWorkspaceDisplaySize(targetPlatform, activeAsset);
   const { width: activeRealW, height: activeRealH, label: activeRealLabel } = getAssetDimensions(targetPlatform, activeAsset);
+  const exportLogoDisplay = getWorkspaceDisplaySize(targetPlatform, 'logo80');
+  const exportCover400Display = getWorkspaceDisplaySize(targetPlatform, 'cover400');
+  const exportCover700_1Display = getWorkspaceDisplaySize(targetPlatform, 'cover700_1');
+  const exportCover700_2Display = getWorkspaceDisplaySize(targetPlatform, 'cover700_2');
 
   // UI always uses Vazirmatn; the user-selected/uploaded font applies only to canvases and exports.
   return (
@@ -1575,60 +1600,60 @@ export function App() {
         {/* 1. Logo 80 */}
         <div 
           ref={exportLogo80Ref}
-          className={`w-[80px] h-[80px] rounded-xl flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden shrink-0 select-none ${currentFontCss}`} 
-          style={getDynamicBackgroundStyle()}
+          className={`rounded-xl flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden shrink-0 select-none ${currentFontCss}`}
+          style={{ ...getDynamicBackgroundStyle(), width: exportLogoDisplay.displayWidth, height: exportLogoDisplay.displayHeight }}
         >
           <RenderPlacedLogo config={logoConfig} isDraggable={false} />
           {canvasLayers.logo80?.filter(l => l.type !== 'background').map(l => (
-            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={80} canvasHeight={80} />
+            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={exportLogoDisplay.displayWidth} canvasHeight={exportLogoDisplay.displayHeight} />
           ))}
           <CanvasStickersOverlay stickers={canvasStickers.logo80 || []} isEditable={false} />
         </div>
 
-        {/* 2. Cover 400 (Matches live 340x340 on-screen proportions with exact p-5 padding) */}
+        {/* 2. Cover 400 */}
         <div 
           ref={exportCover400Ref}
-          className={`w-[340px] h-[340px] rounded-2xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden ${currentFontCss}`} 
-          style={getDynamicBackgroundStyle()}
+          className={`rounded-2xl p-5 flex flex-col justify-between shadow-2xl relative overflow-hidden ${currentFontCss}`}
+          style={{ ...getDynamicBackgroundStyle(), width: exportCover400Display.displayWidth, height: exportCover400Display.displayHeight }}
         >
           <RenderPlacedLogo config={logoConfig} isDraggable={false} />
           {canvasLayers.cover400?.filter(l => l.type !== 'background').map(l => (
-            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={340} canvasHeight={340} />
+            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={exportCover400Display.displayWidth} canvasHeight={exportCover400Display.displayHeight} />
           ))}
           <CanvasStickersOverlay stickers={canvasStickers.cover400 || []} isEditable={false} />
         </div>
 
-        {/* 3. Cover 700_1 (Matches live 380x380 on-screen proportions with exact p-6 padding) */}
+        {/* 3. Cover 700_1 */}
         <div 
           ref={exportCover700_1Ref}
-          className={`w-[380px] h-[380px] rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden ${currentFontCss}`} 
-          style={getDynamicBackgroundStyle()}
+          className={`rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden ${currentFontCss}`}
+          style={{ ...getDynamicBackgroundStyle(), width: exportCover700_1Display.displayWidth, height: exportCover700_1Display.displayHeight }}
         >
           <RenderPlacedLogo config={logoConfig} isDraggable={false} />
           {canvasLayers.cover700_1?.filter(l => l.type !== 'background').map(l => (
-            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={380} canvasHeight={380} />
+            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={exportCover700_1Display.displayWidth} canvasHeight={exportCover700_1Display.displayHeight} />
           ))}
           <CanvasStickersOverlay stickers={canvasStickers.cover700_1 || []} isEditable={false} />
         </div>
 
-        {/* 4. Cover 700_2 (Matches live 380x380 on-screen proportions with exact p-6 padding) */}
+        {/* 4. Cover 700_2 */}
         <div 
           ref={exportCover700_2Ref}
-          className={`w-[380px] h-[380px] rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden ${currentFontCss}`} 
-          style={getDynamicBackgroundStyle()}
+          className={`rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden ${currentFontCss}`}
+          style={{ ...getDynamicBackgroundStyle(), width: exportCover700_2Display.displayWidth, height: exportCover700_2Display.displayHeight }}
         >
           <RenderPlacedLogo config={logoConfig} isDraggable={false} />
           {canvasLayers.cover700_2?.filter(l => l.type !== 'background').map(l => (
-            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={380} canvasHeight={380} />
+            <DynamicLayerRenderer key={l.id} layer={l} isInteractive={false} canvasWidth={exportCover700_2Display.displayWidth} canvasHeight={exportCover700_2Display.displayHeight} />
           ))}
           <CanvasStickersOverlay stickers={canvasStickers.cover700_2 || []} isEditable={false} />
         </div>
 
-        {/* 5. Infographic (Official 594px Zhaket width standard, full height without scrollbars or settings controls) */}
+        {/* 5. Infographic export stage adapts to the selected marketplace dimensions. */}
         <div 
           ref={exportInfographicRef}
-          className={`w-[594px] rounded-2xl p-6 space-y-4 shadow-2xl relative ${currentFontCss}`} 
-          style={getDynamicBackgroundStyle()}
+          className={`rounded-2xl p-6 space-y-4 shadow-2xl relative ${currentFontCss}`}
+          style={{ ...getDynamicBackgroundStyle(), width: getAssetDimensions(targetPlatform, 'infographic').width }}
         >
           <RenderPlacedLogo config={logoConfig} isDraggable={false} />
           <CanvasStickersOverlay stickers={canvasStickers.infographic || []} isEditable={false} />
