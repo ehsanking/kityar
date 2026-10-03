@@ -2665,7 +2665,7 @@ export function App() {
               <div className="space-y-3">
                 
                 {/* Photoshop Studio Dock Tab Navigation Bar */}
-                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-nowrap items-center gap-1 overflow-x-auto custom-scrollbar shadow-xl" role="group" aria-label="پنل‌های استودیو">
+                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-wrap items-center gap-1 shadow-xl" role="group" aria-label="پنل‌های استودیو">
                   {[
                     { id: 'layers', label: 'لایه‌ها', icon: Layers, color: 'text-amber-400' },
                     { id: 'mockup', label: 'موکاپ‌ها', icon: Smartphone, color: 'text-indigo-400' },
