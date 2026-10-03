@@ -56,4 +56,10 @@ describe('getAssetSpec', () => {
     expect(getAssetSpec('custom', 'cover400', { width: 300, height: 200 })).toMatchObject({ width: 300, height: 200 });
     expect(getAssetSpec('unknown', 'nope')).toMatchObject({ width: 400, height: 400 });
   });
+
+  it('resolves infographic export dimensions for each selected target', () => {
+    expect(getAssetSpec('rastchin', 'infographic')).toMatchObject({ width: 800, height: 400 });
+    expect(getAssetSpec('bazaar', 'infographic')).toMatchObject({ width: 1200, height: 628 });
+    expect(getAssetSpec('custom', 'infographic', { width: 900, height: 500 })).toMatchObject({ width: 900, height: 500 });
+  });
 });

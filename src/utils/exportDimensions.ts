@@ -8,6 +8,10 @@ export interface ExportTarget {
   dimensions?: ExportDimensions;
 }
 
+export function getExportAssetKey(prefix: string, dimensions: ExportDimensions): string {
+  return `${prefix}_${dimensions.width}x${dimensions.height}`;
+}
+
 const isPositiveFinite = (value: number): boolean => Number.isFinite(value) && value > 0;
 
 export function getCapturePixelRatio(

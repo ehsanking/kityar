@@ -1,10 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import { getCapturePixelRatio, resizeCanvasToDimensions, type ExportDimensions } from './exportDimensions';
+import { getCapturePixelRatio, getExportAssetKey, resizeCanvasToDimensions, type ExportDimensions } from './exportDimensions';
 
 describe('export dimensions', () => {
   it('calculates the scale needed to reach the requested pixel dimensions', () => {
     expect(getCapturePixelRatio(380, 380, { width: 400, height: 400 })).toBeCloseTo(400 / 380);
     expect(getCapturePixelRatio(380, 279, { width: 450, height: 330 })).toBeCloseTo(450 / 380);
+  });
+
+  it('uses resolved dimensions in packaged asset names', () => {
+    expect(getExportAssetKey('5_infographic', { width: 800, height: 400 })).toBe('5_infographic_800x400');
+    expect(getExportAssetKey('5_infographic', { width: 1200, height: 628 })).toBe('5_infographic_1200x628');
   });
 
   it('normalizes the rendered canvas to the exact requested dimensions', () => {

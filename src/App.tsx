@@ -58,7 +58,7 @@ import { parseProjectFile, MAX_PROJECT_FILE_BYTES } from './store/projectFile';
 import { getAssetSpec, MARKETPLACES, type AssetId } from './features/marketplace/specs';
 import { checkCompliance, type ComplianceReport } from './features/marketplace/compliance';
 import { measureLayers } from './features/marketplace/measure';
-import type { ExportDimensions, ExportTarget } from './utils/exportDimensions';
+import { getExportAssetKey, type ExportDimensions, type ExportTarget } from './utils/exportDimensions';
 import { parseCsv } from './features/batch/csv';
 import { useTemplateVars } from './features/batch/template';
 import { BrandKit, DEFAULT_BRAND_KIT, applyBrandToLayers, brandGradient, loadBrandKit, saveBrandKit } from './features/brand/brandKit';
@@ -106,8 +106,7 @@ export function App() {
     return { width, height, label };
   };
 
-  const getAssetExportDimensions = (assetId: AssetId): ExportDimensions | undefined => {
-    if (assetId === 'infographic') return undefined;
+  const getAssetExportDimensions = (assetId: AssetId): ExportDimensions => {
     const { width, height } = getAssetDimensions(targetPlatform, assetId);
     return { width, height };
   };
@@ -1449,9 +1448,8 @@ export function App() {
     const map: { [key: string]: ExportTarget } = {};
     const add = (prefix: string, assetId: AssetId, element: HTMLElement | null) => {
       if (!element) return;
-      const { width, height } = getAssetDimensions(targetPlatform, assetId);
       const dimensions = getAssetExportDimensions(assetId);
-      const key = assetId === 'infographic' ? `${prefix}_594x4000` : `${prefix}_${width}x${height}`;
+      const key = getExportAssetKey(prefix, dimensions);
       map[key] = { element, dimensions };
     };
 
@@ -1651,11 +1649,11 @@ export function App() {
           <CanvasStickersOverlay stickers={canvasStickers.cover700_2 || []} isEditable={false} />
         </div>
 
-        {/* 5. Infographic (Official 594px Zhaket width standard, full height without scrollbars or settings controls) */}
+        {/* 5. Infographic export stage adapts to the selected marketplace dimensions. */}
         <div 
           ref={exportInfographicRef}
-          className={`w-[594px] rounded-2xl p-6 space-y-4 shadow-2xl relative ${currentFontCss}`} 
-          style={getDynamicBackgroundStyle()}
+          className={`rounded-2xl p-6 space-y-4 shadow-2xl relative ${currentFontCss}`}
+          style={{ ...getDynamicBackgroundStyle(), width: getAssetDimensions(targetPlatform, 'infographic').width }}
         >
           <RenderPlacedLogo config={logoConfig} isDraggable={false} />
           <CanvasStickersOverlay stickers={canvasStickers.infographic || []} isEditable={false} />
