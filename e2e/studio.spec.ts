@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { getInitialTemplateLayers } from '../src/data/studioTemplates';
 
 const MARK = 'E2E-LAYER';
+const CUSTOM_FONT_FIXTURE = 'e2e/fixtures/wide-space.ttf';
 
 const readSavedDocument = (page: Page) =>
   page.evaluate(
@@ -162,7 +163,7 @@ test('free-form Konva tab sends a shape to the main canvas; chart tab renders', 
 test('uploaded custom font is embedded in exports', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: 'فونت', exact: true }).first().click();
-  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles('/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf');
+  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles(CUSTOM_FONT_FIXTURE);
   await page.waitForTimeout(800);
   const css = await page.evaluate(async () => {
     const { getFontEmbedCSS } = await import(/* @vite-ignore */ String('/node_modules/.vite/deps/html-to-image.js'));
@@ -174,7 +175,7 @@ test('uploaded custom font is embedded in exports', async ({ page }) => {
 test('uploaded font does not leak into the UI', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: 'فونت', exact: true }).first().click();
-  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles('e2e/fixtures/wide-space.ttf');
+  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles(CUSTOM_FONT_FIXTURE);
   await page.waitForTimeout(800);
   const fonts = await page.evaluate(() => ({
     uiButton: getComputedStyle(document.querySelector('header button')!).fontFamily,

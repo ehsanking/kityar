@@ -594,6 +594,37 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const handleAddChartLayer = (chartConfig: Partial<CanvasLayerItem>) => {
+    const newId = `chart-${Date.now()}`;
+    const { displayWidth, displayHeight } = getWorkspaceDisplaySize(targetPlatform, activeAsset);
+    const fitScale = Math.min(1, displayWidth / 340, displayHeight / 230);
+    const width = Math.round(340 * fitScale);
+    const height = Math.round(230 * fitScale);
+    const newLayer: CanvasLayerItem = {
+      id: newId,
+      name: chartConfig.name || 'نمودار تحلیل محصول',
+      type: 'chart',
+      visible: true,
+      locked: false,
+      zIndex: (currentLayers.length + 1) * 10,
+      scale: 1,
+      rotation: 0,
+      opacity: 100,
+      x: Math.max(0, Math.round((displayWidth - width) / 2)),
+      y: Math.max(0, Math.round((displayHeight - height) / 2)),
+      data: {
+        ...chartConfig.data,
+        width,
+        height,
+      },
+    };
+
+    setCanvasLayers((prev) => appendLayer(prev, activeAsset, newLayer));
+    setActiveLayerId(newId);
+    setToastMessage('نمودار تحلیل محصول به بوم افزوده شد.');
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
   const handleAddImageLayer = (imageConfig: Partial<CanvasLayerItem>) => {
     const newId = `img-${Date.now()}`;
     const newLayer: CanvasLayerItem = {
@@ -2092,7 +2123,7 @@ export function App() {
               {/* 1. LEFT / CENTER: INTERACTIVE CANVAS WITH LIVE LAYERS */}
               <div 
                 ref={activeCanvasContainerRef}
-                className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[540px] relative overflow-hidden shadow-2xl"
+                className="lg:col-span-2 min-w-0 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[540px] relative overflow-hidden shadow-2xl"
                 onClick={() => setActiveLayerId(null)}
                 onContextMenu={(e) => handleOpenContextMenu(e)}
               >
@@ -2662,10 +2693,10 @@ export function App() {
               </div>
 
               {/* 2. RIGHT SIDEBAR: UNIFIED PHOTOSHOP STUDIO DOCK */}
-              <div className="space-y-3">
+              <div className="space-y-3 min-w-0">
                 
                 {/* Photoshop Studio Dock Tab Navigation Bar */}
-                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-wrap items-center gap-1 shadow-xl" role="group" aria-label="پنل‌های استودیو">
+                <div className="w-full min-w-0 bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-wrap items-center gap-1 shadow-xl" role="group" aria-label="پنل‌های استودیو">
                   {[
                     { id: 'layers', label: 'لایه‌ها', icon: Layers, color: 'text-amber-400' },
                     { id: 'mockup', label: 'موکاپ‌ها', icon: Smartphone, color: 'text-indigo-400' },
@@ -2851,7 +2882,7 @@ export function App() {
                 {sidebarActiveTab === 'chart' && (
                   <div className="p-4 bg-slate-900 border border-emerald-500/30 rounded-3xl space-y-3 shadow-xl animate-in fade-in duration-150">
                     <Suspense fallback={<p className="text-xs text-slate-400">در حال بارگذاری نمودارساز…</p>}>
-                      <ProductAnalyticsChart />
+                      <ProductAnalyticsChart onAddToCanvas={handleAddChartLayer} />
                     </Suspense>
                   </div>
                 )}
