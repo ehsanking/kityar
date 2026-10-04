@@ -255,3 +255,21 @@ test('no UI element spills out of its panel at 125% scaling', async ({ page }) =
   const real = [...new Set(all)].filter((l) => !/ -\d{4}/.test(l) && !/\| (svg|g|text)$/.test(l));
   expect(real).toEqual([]);
 });
+
+test('infographic grows with layers added beyond the base height', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /مارکت ژاکت/ }).first().click();
+  await page.evaluate(async () => {
+    const { useStudioStore } = await import(/* @vite-ignore */ String('/src/store/index.ts'));
+    useStudioStore.getState().setCanvasLayers((m: any) => ({
+      ...m,
+      infographic: [{ id: 'info-e2e', name: 'INFO-E2E', type: 'text', x: 20, y: 900, scale: 1, rotation: 0, visible: true, locked: false, zIndex: 5, data: { text: 'INFO-E2E-TEXT', fontSize: 24, color: '#ffffff', width: 200, height: 60 } }],
+    }));
+  });
+  await page.locator('button:has-text("اینفوگرافی")').first().click();
+  const wrap = page.locator('[data-testid="infographic-layers"]');
+  await expect(wrap).toBeAttached();
+  await expect(page.getByText('INFO-E2E-TEXT').first()).toBeAttached();
+  const h = await wrap.evaluate((el) => el.getBoundingClientRect().height);
+  expect(h).toBeGreaterThan(430);
+});
