@@ -1,22 +1,7 @@
 import React, { useState } from 'react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  AreaChart,
-  Area,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  CartesianGrid,
-} from 'recharts';
-import { BarChart3, LineChart, PieChart, Sparkles, SlidersHorizontal, Plus, Trash2 } from 'lucide-react';
+import { BarChart3, LineChart, PieChart, Sparkles, SlidersHorizontal, Plus, Trash2, PlusCircle } from 'lucide-react';
+import type { CanvasLayerItem } from '../types/canvasLayers';
+import ProductAnalyticsChartView from './ProductAnalyticsChartView';
 
 export interface DataPoint {
   name: string;
@@ -34,7 +19,11 @@ const DEFAULT_DATA: DataPoint[] = [
   { name: 'شهریور', sales: 1450, rating: 98, performance: 97 },
 ];
 
-export const ProductAnalyticsChart: React.FC = () => {
+interface ProductAnalyticsChartProps {
+  onAddToCanvas?: (layer: Partial<CanvasLayerItem>) => void;
+}
+
+export const ProductAnalyticsChart: React.FC<ProductAnalyticsChartProps> = ({ onAddToCanvas }) => {
   const [chartType, setChartType] = useState<'area' | 'bar' | 'radar'>('area');
   const [data, setData] = useState<DataPoint[]>(DEFAULT_DATA);
   const [accentColor, setAccentColor] = useState<string>('#10b981'); // Emerald default
@@ -127,64 +116,33 @@ export const ProductAnalyticsChart: React.FC = () => {
             <span>عنکبوتی (Radar)</span>
           </button>
         </div>
+
+        {onAddToCanvas && (
+          <button
+            type="button"
+            onClick={() =>
+              onAddToCanvas({
+                name: 'نمودار تحلیل محصول',
+                type: 'chart',
+                data: {
+                  chartType,
+                  chartData: data.map((point) => ({ ...point })),
+                  chartAccentColor: accentColor,
+                  chartTitle: 'نمودار تحلیل محصول',
+                },
+              })
+            }
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-200 transition-colors hover:bg-emerald-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          >
+            <PlusCircle className="h-4 w-4" aria-hidden="true" />
+            <span>افزودن به بوم</span>
+          </button>
+        )}
       </div>
 
       {/* Chart Canvas Display */}
       <div className="w-full h-64 bg-slate-900/60 rounded-xl p-3 border border-white/5 relative overflow-hidden">
-        <ResponsiveContainer width="100%" height="100%">
-          {chartType === 'area' ? (
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={accentColor} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={accentColor} stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
-              <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#0f172a',
-                  borderColor: '#334155',
-                  borderRadius: '12px',
-                  color: '#fff',
-                  fontSize: '11px',
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: '11px', color: '#cbd5e1' }} />
-              <Area type="monotone" dataKey="sales" name="فروش (تعداد)" stroke={accentColor} strokeWidth={2.5} fillOpacity={1} fill="url(#salesGrad)" />
-            </AreaChart>
-          ) : chartType === 'bar' ? (
-            <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.5} />
-              <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#0f172a',
-                  borderColor: '#334155',
-                  borderRadius: '12px',
-                  color: '#fff',
-                  fontSize: '11px',
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: '11px', color: '#cbd5e1' }} />
-              <Bar dataKey="sales" name="فروش" fill={accentColor} radius={[6, 6, 0, 0]} />
-              <Bar dataKey="performance" name="عملکرد (%)" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          ) : (
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-              <PolarGrid stroke="#334155" />
-              <PolarAngleAxis dataKey="name" stroke="#cbd5e1" fontSize={11} />
-              <PolarRadiusAxis stroke="#64748b" fontSize={9} />
-              <Radar name="امتیاز رضایت" dataKey="rating" stroke={accentColor} fill={accentColor} fillOpacity={0.5} />
-              <Radar name="شاخص عملکرد" dataKey="performance" stroke="#a855f7" fill="#a855f7" fillOpacity={0.4} />
-              <Legend wrapperStyle={{ fontSize: '11px', color: '#cbd5e1' }} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderRadius: '10px' }} />
-            </RadarChart>
-          )}
-        </ResponsiveContainer>
+        <ProductAnalyticsChartView chartType={chartType} data={data} accentColor={accentColor} />
       </div>
 
       {/* Editor & Data Controls */}

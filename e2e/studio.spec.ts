@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { getInitialTemplateLayers } from '../src/data/studioTemplates';
 
 const MARK = 'E2E-LAYER';
+const CUSTOM_FONT_FIXTURE = 'e2e/fixtures/wide-space.ttf';
 
 const readSavedDocument = (page: Page) =>
   page.evaluate(
@@ -162,7 +163,7 @@ test('free-form Konva tab sends a shape to the main canvas; chart tab renders', 
 test('uploaded custom font is embedded in exports', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: 'فونت', exact: true }).first().click();
-  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles('/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf');
+  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles(CUSTOM_FONT_FIXTURE);
   await page.waitForTimeout(800);
   const css = await page.evaluate(async () => {
     const { getFontEmbedCSS } = await import(/* @vite-ignore */ String('/node_modules/.vite/deps/html-to-image.js'));
@@ -174,7 +175,7 @@ test('uploaded custom font is embedded in exports', async ({ page }) => {
 test('uploaded font does not leak into the UI', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: 'فونت', exact: true }).first().click();
-  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles('e2e/fixtures/wide-space.ttf');
+  await page.locator('input[type="file"][accept*=".ttf"]').first().setInputFiles(CUSTOM_FONT_FIXTURE);
   await page.waitForTimeout(800);
   const fonts = await page.evaluate(() => ({
     uiButton: getComputedStyle(document.querySelector('header button')!).fontFamily,
@@ -253,4 +254,22 @@ test('no UI element spills out of its panel at 125% scaling', async ({ page }) =
   // Off-screen export stages (x < -1000) are intentional; SVG ruler glyphs may touch edges.
   const real = [...new Set(all)].filter((l) => !/ -\d{4}/.test(l) && !/\| (svg|g|text)$/.test(l));
   expect(real).toEqual([]);
+});
+
+test('infographic grows with layers added beyond the base height', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /مارکت ژاکت/ }).first().click();
+  await page.evaluate(async () => {
+    const { useStudioStore } = await import(/* @vite-ignore */ String('/src/store/index.ts'));
+    useStudioStore.getState().setCanvasLayers((m: any) => ({
+      ...m,
+      infographic: [{ id: 'info-e2e', name: 'INFO-E2E', type: 'text', x: 20, y: 900, scale: 1, rotation: 0, visible: true, locked: false, zIndex: 5, data: { text: 'INFO-E2E-TEXT', fontSize: 24, color: '#ffffff', width: 200, height: 60 } }],
+    }));
+  });
+  await page.locator('button:has-text("اینفوگرافی")').first().click();
+  const wrap = page.locator('[data-testid="infographic-layers"]');
+  await expect(wrap).toBeAttached();
+  await expect(page.getByText('INFO-E2E-TEXT').first()).toBeAttached();
+  const h = await wrap.evaluate((el) => el.getBoundingClientRect().height);
+  expect(h).toBeGreaterThan(430);
 });

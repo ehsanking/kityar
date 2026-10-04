@@ -15,6 +15,8 @@ import { toPersianDigits } from '../utils/persianNumbers';
 import { sanitizeSvg } from '../utils/sanitizeSvg';
 import { fillTemplate, selectVars, useTemplateVars } from '../features/batch/template';
 
+const ProductAnalyticsChartView = React.lazy(() => import('./ProductAnalyticsChartView'));
+
 interface DynamicLayerRendererProps {
   layer: CanvasLayerItem;
   otherLayers?: CanvasLayerItem[];
@@ -1224,7 +1226,34 @@ export const DynamicLayerRenderer: React.FC<DynamicLayerRendererProps> = ({
         );
       }
 
-      // 12. MOCKUP LAYER
+      // 12. PRODUCT ANALYTICS CHART
+      case 'chart': {
+        const width = Math.max(160, Number(data.width) || 340);
+        const height = Math.max(120, Number(data.height) || 230);
+        const chartTitle = data.chartTitle || layer.name || 'نمودار تحلیل محصول';
+
+        return (
+          <div
+            className="flex flex-col overflow-hidden rounded-xl border border-emerald-500/40 bg-slate-950 p-2"
+            style={{ width, height }}
+            role="img"
+            aria-label={chartTitle}
+          >
+            <h3 className="mb-1 shrink-0 truncate text-right text-xs font-bold text-white">{chartTitle}</h3>
+            <div className="min-h-0 min-w-0 flex-1">
+              <React.Suspense fallback={<div className="h-full w-full bg-slate-900" />}>
+                <ProductAnalyticsChartView
+                  chartType={data.chartType || 'area'}
+                  data={data.chartData || []}
+                  accentColor={data.chartAccentColor || '#10b981'}
+                />
+              </React.Suspense>
+            </div>
+          </div>
+        );
+      }
+
+      // 13. MOCKUP LAYER
       case 'mockup': {
         const mockupType = data.mockupType || 'mobile';
         const screenImage = data.screenImage;

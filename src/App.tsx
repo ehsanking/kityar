@@ -58,6 +58,7 @@ import { parseProjectFile, MAX_PROJECT_FILE_BYTES } from './store/projectFile';
 import { getAssetSpec, MARKETPLACES, type AssetId } from './features/marketplace/specs';
 import { checkCompliance, type ComplianceReport } from './features/marketplace/compliance';
 import { measureLayers } from './features/marketplace/measure';
+import { getInfographicDisplayHeight } from './utils/infographicHeight';
 import { getExportAssetKey, type ExportDimensions, type ExportTarget } from './utils/exportDimensions';
 import { parseCsv } from './features/batch/csv';
 import { useTemplateVars } from './features/batch/template';
@@ -121,12 +122,12 @@ export function App() {
     setComplianceReport({ ...checkCompliance(spec, measures), assetLabel: spec.label, platform: targetPlatform });
   };
 
-  const getWorkspaceDisplaySize = (platform: string, assetId: string) => {
+  const getWorkspaceDisplaySize = (platform: string, assetId: string, layers?: CanvasLayerItem[]) => {
     const { width: realW, height: realH } = getAssetDimensions(platform, assetId);
     
     // For infographic of zhaket, keep tall
     if (assetId === 'infographic' && platform === 'zhaket') {
-      return { displayWidth: 350, displayHeight: 430, scale: 350 / realW };
+      return { displayWidth: 350, displayHeight: getInfographicDisplayHeight(layers ?? canvasLayers.infographic, 430, Math.round(realH * 350 / realW)), scale: 350 / realW };
     }
     
     const maxW = 380;
@@ -591,6 +592,37 @@ export function App() {
     setCanvasLayers((prev) => appendLayer(prev, activeAsset, newLayer));
     setActiveLayerId(newId);
     setToastMessage('موکاپ سه‌بعدی به بوم افزوده شد.');
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleAddChartLayer = (chartConfig: Partial<CanvasLayerItem>) => {
+    const newId = `chart-${Date.now()}`;
+    const { displayWidth, displayHeight } = getWorkspaceDisplaySize(targetPlatform, activeAsset);
+    const fitScale = Math.min(1, displayWidth / 340, displayHeight / 230);
+    const width = Math.round(340 * fitScale);
+    const height = Math.round(230 * fitScale);
+    const newLayer: CanvasLayerItem = {
+      id: newId,
+      name: chartConfig.name || 'نمودار تحلیل محصول',
+      type: 'chart',
+      visible: true,
+      locked: false,
+      zIndex: (currentLayers.length + 1) * 10,
+      scale: 1,
+      rotation: 0,
+      opacity: 100,
+      x: Math.max(0, Math.round((displayWidth - width) / 2)),
+      y: Math.max(0, Math.round((displayHeight - height) / 2)),
+      data: {
+        ...chartConfig.data,
+        width,
+        height,
+      },
+    };
+
+    setCanvasLayers((prev) => appendLayer(prev, activeAsset, newLayer));
+    setActiveLayerId(newId);
+    setToastMessage('نمودار تحلیل محصول به بوم افزوده شد.');
     setTimeout(() => setToastMessage(null), 3000);
   };
 
@@ -1574,6 +1606,7 @@ export function App() {
 
   const { displayWidth: activeDispW, displayHeight: activeDispH, scale: activeScale } = getWorkspaceDisplaySize(targetPlatform, activeAsset);
   const { width: activeRealW, height: activeRealH, label: activeRealLabel } = getAssetDimensions(targetPlatform, activeAsset);
+  const exportInfographicDisplay = getWorkspaceDisplaySize(targetPlatform, 'infographic', canvasLayers.infographic);
   const exportLogoDisplay = getWorkspaceDisplaySize(targetPlatform, 'logo80');
   const exportCover400Display = getWorkspaceDisplaySize(targetPlatform, 'cover400');
   const exportCover700_1Display = getWorkspaceDisplaySize(targetPlatform, 'cover700_1');
@@ -1664,6 +1697,23 @@ export function App() {
         >
           <RenderPlacedLogo config={logoConfig} isDraggable={false} />
           <CanvasStickersOverlay stickers={canvasStickers.infographic || []} isEditable={false} />
+          <div className="pointer-events-none absolute left-0 top-0 z-20" style={{ width: 350, transform: `scale()`, transformOrigin: 'top left' }}>
+            {canvasLayers.infographic.filter(l => l.type !== 'background').map(l => (
+              <DynamicLayerRenderer
+                key={l.id}
+                layer={l}
+                otherLayers={canvasLayers.infographic}
+                isSelected={false}
+                onSelect={() => {}}
+                onUpdateLayer={() => {}}
+                onUpdateLayerData={() => {}}
+                onUpdatePosition={() => {}}
+                isInteractive={false}
+                canvasWidth={350}
+                canvasHeight={exportInfographicDisplay.displayHeight}
+              />
+            ))}
+          </div>
           <div className="text-center bg-slate-950/85 p-5 rounded-2xl border border-emerald-500/30 space-y-2 backdrop-blur-md">
             <span className="text-xs text-emerald-400 font-extrabold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">اینفوگرافی رسمی محصول</span>
             <h3 className="text-xl font-black text-white">{productName}</h3>
@@ -2092,7 +2142,7 @@ export function App() {
               {/* 1. LEFT / CENTER: INTERACTIVE CANVAS WITH LIVE LAYERS */}
               <div 
                 ref={activeCanvasContainerRef}
-                className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[540px] relative overflow-hidden shadow-2xl"
+                className="lg:col-span-2 min-w-0 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[540px] relative overflow-hidden shadow-2xl"
                 onClick={() => setActiveLayerId(null)}
                 onContextMenu={(e) => handleOpenContextMenu(e)}
               >
@@ -2547,7 +2597,7 @@ export function App() {
                 {activeAsset === 'infographic' && (
                   <CanvasRulers 
                     width={350} 
-                    height={430} 
+                    height={activeDispH} 
                     unit={rulerUnit}
                     showRulers={showRulers} 
                     showCrosshairLines={showCrosshairLines}
@@ -2558,8 +2608,8 @@ export function App() {
                   >
                     <div 
                       ref={activeAsset === 'infographic' ? activeLiveCanvasRef : undefined}
-                      className="custom-scrollbar relative z-10 space-y-4 overflow-y-auto p-4 border-2 border-emerald-500/40 rounded-2xl w-[350px] h-[430px] shadow-2xl" 
-                      style={getDynamicBackgroundStyle()}
+                      className="relative isolate z-10 space-y-4 p-4 border-2 border-emerald-500/40 rounded-2xl w-[350px] shadow-2xl" 
+                      style={{ ...getDynamicBackgroundStyle(), minHeight: activeDispH }}
                     >
                       <RenderPlacedLogo config={logoConfig} />
 
@@ -2655,6 +2705,28 @@ export function App() {
                           </div>
                         </SortableContext>
                       </DndContext>
+                      <div className="pointer-events-none absolute inset-0 z-20" data-testid="infographic-layers">
+                        {currentLayers.filter(l => l.type !== 'background').map(l => (
+                          <div key={l.id} className="pointer-events-auto">
+                            <DynamicLayerRenderer
+                              layer={l}
+                              otherLayers={currentLayers}
+                              isSelected={activeLayerId === l.id}
+                              onSelect={() => setActiveLayerId(l.id)}
+                              onUpdateLayer={handleUpdateLayer}
+                              onUpdateLayerData={handleUpdateLayerData}
+                              onUpdatePosition={handleUpdateLayerPosition}
+                              onOpenContextMenu={handleOpenContextMenuAt}
+                              isInteractive={true}
+                              canvasWidth={activeDispW}
+                              canvasHeight={activeDispH}
+                              enableMagneticSnap={enableMagneticSnap}
+                              gridSnapSize={gridSnapSize}
+                              onDragStateChange={setDraggingGuide}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </CanvasRulers>
                 )}
@@ -2662,10 +2734,10 @@ export function App() {
               </div>
 
               {/* 2. RIGHT SIDEBAR: UNIFIED PHOTOSHOP STUDIO DOCK */}
-              <div className="space-y-3">
+              <div className="space-y-3 min-w-0">
                 
                 {/* Photoshop Studio Dock Tab Navigation Bar */}
-                <div className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-nowrap items-center gap-1 overflow-x-auto custom-scrollbar shadow-xl" role="group" aria-label="پنل‌های استودیو">
+                <div className="w-full min-w-0 bg-slate-900 border border-slate-800 p-1.5 rounded-2xl flex flex-wrap items-center gap-1 shadow-xl" role="group" aria-label="پنل‌های استودیو">
                   {[
                     { id: 'layers', label: 'لایه‌ها', icon: Layers, color: 'text-amber-400' },
                     { id: 'mockup', label: 'موکاپ‌ها', icon: Smartphone, color: 'text-indigo-400' },
@@ -2851,7 +2923,7 @@ export function App() {
                 {sidebarActiveTab === 'chart' && (
                   <div className="p-4 bg-slate-900 border border-emerald-500/30 rounded-3xl space-y-3 shadow-xl animate-in fade-in duration-150">
                     <Suspense fallback={<p className="text-xs text-slate-400">در حال بارگذاری نمودارساز…</p>}>
-                      <ProductAnalyticsChart />
+                      <ProductAnalyticsChart onAddToCanvas={handleAddChartLayer} />
                     </Suspense>
                   </div>
                 )}
