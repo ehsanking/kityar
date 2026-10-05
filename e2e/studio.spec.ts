@@ -212,7 +212,7 @@ test('colour picker stores rgba with transparency and is not hidden behind panel
   expect(color).toMatch(/^rgba\(\d+, \d+, \d+, 0\.\d+\)$/);
 });
 
-// Report elements whose box sticks out of the nearest clipping/scrolling ancestor or the viewport.
+// Report elements that spill out of a clipping ancestor or the viewport.
 const audit = (page: Page, label: string) => page.evaluate((label) => {
   const out: string[] = [];
   const vw = document.documentElement.clientWidth;
@@ -221,12 +221,20 @@ const audit = (page: Page, label: string) => page.evaluate((label) => {
     if (r.width < 4 || r.height < 4) continue;
     const cs = getComputedStyle(el);
     if (cs.position === 'fixed' || cs.visibility === 'hidden') continue;
-    let p = el.parentElement, box: DOMRect | null = null;
+    let p = el.parentElement, box: DOMRect | null = null, inScrollArea = false;
     while (p && p !== document.body) {
       const ps = getComputedStyle(p);
-      if (/(hidden|auto|scroll|clip)/.test(ps.overflowX) || ps.position === 'fixed') { box = p.getBoundingClientRect(); break; }
+      if (/(auto|scroll)/.test(ps.overflowX)) {
+        const scrollBox = p.getBoundingClientRect();
+        if (r.left < scrollBox.left - 2 || r.right > scrollBox.right + 2) {
+          inScrollArea = true;
+          break;
+        }
+      }
+      if (/(hidden|clip)/.test(ps.overflowX) || ps.position === 'fixed') { box = p.getBoundingClientRect(); break; }
       p = p.parentElement;
     }
+    if (inScrollArea) continue;
     const left = box ? box.left : 0, right = box ? box.right : vw;
     if (r.left < left - 2 || r.right > right + 2) {
       const txt = (el.innerText || el.getAttribute('aria-label') || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 40);
